@@ -11,18 +11,34 @@ const saltRounds = 10;
 
 // User registration endpoint
 router.post("/signup", (req, res, next) => {
-  const { email, password, name } = req.body;
+  const {name, email, password  } = req.body;
 
   // Check if email, password, and name are provided
-  if (!email || !password || !name) {
-    return res.status(400).json({ message: "Email, password, and name are required." });
+  if (email === '' || password === '' || name === '' ) {
+    res.status(400).json({ message: "Provide email, password and name" });
+    return;
+  }
+
+  // Use regex to validate the email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailRegex.test(email)) {
+    res.status(400).json({ message: 'Provide a valid email address.' });
+    return;
+  }
+  
+  // Use regex to validate the password format
+  const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+  if (!passwordRegex.test(password)) {
+    res.status(400).json({ message: 'Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.' });
+    return;
   }
 
   // Check if user with the same email already exists
   User.findOne({ email })
     .then(existingUser => {
       if (existingUser) {
-        return res.status(400).json({ message: "User already exists." });
+        res.status(400).json({ message: "User already exists." });
+        return;
       }
 
       // Hash the password

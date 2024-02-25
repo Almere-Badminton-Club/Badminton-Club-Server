@@ -2,22 +2,22 @@ const { Schema, model } = require("mongoose");
 
 const bookingSchema = new Schema(
     {
-        booking_id: {
+        bookingId: {
             type: String, // or ObjectId if using MongoDB
             required: true,
             unique: true
         },
-        user_id: {
+        userId: {
             type: String, // or ObjectId if using MongoDB
             required: true,
             ref: 'User' // Reference to the Users collection
         },
-        seat_id: {
+        seatId: {
             type: String, // or ObjectId if using MongoDB
             required: true,
             ref: 'Seat' // Reference to the Seats collection
         },
-        booking_date: {
+        bookingDate: {
             type: Date,
             required: true
         }

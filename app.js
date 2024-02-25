@@ -21,6 +21,14 @@ app.use("/api", indexRoutes);
 const authRoutes = require("./routes/auth.routes");
 app.use("/auth", authRoutes);
 
+// Mount bookings routes
+const bookingsRoutes = require('./routes/bookings.routes');
+app.use('/api/bookings', bookingsRoutes);
+
+// Mount seats routes
+const seatsRoutes = require('./routes/seats.routes');
+app.use('/api/seats', seatsRoutes);
+
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
 
