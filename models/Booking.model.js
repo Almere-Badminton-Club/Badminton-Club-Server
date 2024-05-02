@@ -8,21 +8,20 @@ const bookingSchema = new Schema(
             unique: true
         },
         userId: {
-            type: String, // or ObjectId if using MongoDB
-            required: true,
-            ref: 'User' // Reference to the Users collection
+            type: Schema.Types.ObjectId, // or ObjectId if using MongoDB
+            ref: 'User', // Reference to the Users collection
+            required: true
         },
         seatId: {
-            type: String, // or ObjectId if using MongoDB
+            type: Schema.Types.ObjectId, // or ObjectId if using MongoDB
+            ref: 'Seat', // Reference to the Seats collection
             required: true,
-            ref: 'Seat' // Reference to the Seats collection
         },
         bookingDate: {
             type: Date,
             required: true
         }
-    }
-)
+    });
 
 const Booking = model("Booking", bookingSchema);
 
