@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Booking = require('../models/Booking.model');
 const User = require('../models/User.model');
 const Seat = require('../models/Seat.model');
-const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
   let bookingId;
   do {
-    bookingId = new ObjectId().toString(); // convert Objectid to string
+    bookingId = new ObjectId().toString(); // Convert ObjectId to string
     console.log("Generated booking ID:", bookingId);
 
-    // Check if booking with same ID exists
+    // Check if booking with the same ID exists
     const existingBooking = await Booking.findOne({ bookingId });
     if (!existingBooking) {
       break; // Unique ID found
@@ -22,13 +22,10 @@ const generateUniqueBookingId = async () => {
   return bookingId;
 };
 
-
-// Endpoint to fetch booking data
+// Endpoint to fetch all bookings
 router.get('/', async (req, res) => {
   try {
-    // Fetch all bookings from the database
     const bookings = await Booking.find();
-    // Send the bookings data as JSON response
     res.json(bookings);
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -36,15 +33,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-
 // Endpoint to create a new booking
 router.post('/', async (req, res) => {
   try {
-    // Extract necessary data from request body
     const { userId, seatId, bookingDate } = req.body;
 
     // Validate required data
-    if (!userId || !seatId || !bookingDate) {
+    if (!userId || !seatId || !bookingDate ) {
       return res.status(400).json({ message: 'Missing required data in request body.' });
     }
 
@@ -60,27 +55,23 @@ router.post('/', async (req, res) => {
       return res.status(404).json({ message: 'Seat not found.' });
     }
 
-    // Generate a unique booking ID using MongoDB's ObjectId
+    // Generate a unique booking ID
     const bookingId = await generateUniqueBookingId();
-
-    console.log(bookingId);
+    console.log("Booking ID to be saved:", bookingId);
 
     // Create new booking
     const booking = new Booking({
       bookingId,
       userId,
       seatId,
-      bookingDate
+      bookingDate,
+      
     });
-
-    console.log(Booking);
 
     // Save booking to database
     const savedBooking = await booking.save();
-    console.log("I am here...",savedBooking);
+    console.log("Booking saved:", savedBooking);
 
-
-    // Respond with success message and created booking
     res.status(201).json({ message: 'Booking created successfully.', booking: savedBooking });
 
   } catch (error) {
@@ -89,5 +80,25 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Endpoint to delete a booking by ID
+router.delete('/:bookingId', async (req, res) => {
+  const { bookingId } = req.params;
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return res.status(400).json({ message: 'Specified ID is not valid' });
+    }
+
+    const booking = await Booking.findOneAndDelete({ bookingId });
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.json({ message: `Booking with ID ${bookingId} was removed successfully.` });
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 module.exports = router;

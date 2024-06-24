@@ -1,39 +1,101 @@
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/Booking.model');
+const Seat = require("../models/Seat.model");
+const User = require("../models/User.model")
 
-// GET /api/seats/availability
-router.get('/availability', (req, res, next) => {
-  const { date } = req.query;
+// Endpoint to fetch all seats
+router.get("/", async (req, res) => {
+  try {
+    const seats = await Seat.find();
+    res.json(seats);
 
-  // Check if date parameter is provided
-  if (!date) {
-    return res.status(400).json({ message: 'Date parameter is required.' });
+  } catch (error) {
+    console.error("Error fetching seats:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-
-  // Parse the date string into a JavaScript Date object
-  const targetDate = new Date(date);
-
-  // Check if the date is valid
-  if (isNaN(targetDate.getTime())) {
-    return res.status(400).json({ message: 'Invalid date format.' });
-  }
-
-  // Query the database to find available seats for the specified date
-  Booking.find({ booking_date: targetDate })
-    .then(bookings => {
-      // Assuming total number of seats is fixed
-      const totalSeats = 20;
-      const bookedSeats = bookings.length;
-      const availableSeats = totalSeats - bookedSeats;
-
-      res.status(200).json({ date: targetDate, availableSeats });
-    })
-    .catch(error => {
-      next(error);
-    });
 });
 
-// Other seat-related routes can be added here...
+// Endpoint to fetch a single seat by ID
+
+router.get("/:seatId", async (req, res) => {
+  const { seatId } = req.params;
+  try {
+    const seat = await Seat.findById(seatId);
+    if (!seat) {
+      return res.status(404).json({ message: "Seat not found." });
+    }
+    res.json(seat);
+  } catch (error) {
+    console.error("Error fetching seat:", error);
+    res.status(500).json({ error: "Internal Server Error." });
+  }
+});
+
+// Endpoint to create a new seat
+
+router.post("/", async (req, res) => {
+  try {
+  const { ObjectId, seat_number, name } = req.body;
+  console.log(" nisha patil",req.body);
+
+  // Validate required data
+  if (!ObjectId || !seat_number || !name ) {
+    return res.status(400).json({ message: 'Missing required data in request body.'});
+  }
+
+  // Check if user exists
+  const user = await User.findOne({name});
+  if(!user) {
+    return res.status(404).json({ message: "User not found"});
+  }
+
+  // Create new Seat
+    const newSeat = new Seat({
+      ObjectId,
+      seat_number,
+      name
+    });
+
+    // Save seat to database
+    const savedSeat = await newSeat.save();
+    res.status(201).json({ message: "Seat created successfully.", seat: savedSeat });
+  } catch (error) {
+    console.error("Error creating Seat:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Endpoint to update a seat by id
+
+router.put("/:seatId", async (req, res) => {
+  const { seatId } = req.params;
+  const { seat_number, name } = req.body;
+  try {
+    const updatedSeat = await Seat.findByIdAndUpdate(seatId, { seat_number, name }, { new: true });
+    if (!updatedSeat) {
+      return res.status(404).json({ message: "Seat not found." });
+    }
+    res.json({ message: "Seat updated successfully.", seat: updatedSeat });
+  } catch (error) {
+    console.error("Error updating seat:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+//Endpoint to delete a seat by Id
+
+router.delete("/:seatId", async (req, res) => {
+  const { seatId } = req.params;
+  try {
+    const deletedSeat = await Seat.findByIdAndDelete(seatId);
+    if(!deletedSeat) {
+      return res.status(404).json({ message: "Seat not found." });
+    }
+    res.json({ message: " Seat deleted successfully." });
+  } catch (error){
+    console.error("Error deleting seat:", error);
+    res.status(500).json({ error: "Internal Server Error"});
+  }
+});
 
 module.exports = router;

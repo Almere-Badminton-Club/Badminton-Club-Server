@@ -28,8 +28,8 @@ const bookingsRouter = require('./routes/bookings.router');
 app.use('/bookings', bookingsRouter);
 
 // Mount seats routes
-const seatRouter = require('./routes/seats.routes');
-app.use('/seats', seatRouter);
+const seatsRouter = require('./routes/seats.routes');
+app.use('/seats', seatsRouter);
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
