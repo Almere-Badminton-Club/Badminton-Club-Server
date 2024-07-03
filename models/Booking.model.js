@@ -20,7 +20,15 @@ const bookingSchema = new Schema(
         bookingDate: {
             type: Date,
             required: true
-        }
+        },
+        dayIndex: {
+            type: Number,
+            required: true,
+        },
+        slotIndex: {
+            type: Number,
+            required: true,
+        },
     });
 
 const Booking = model("Booking", bookingSchema);

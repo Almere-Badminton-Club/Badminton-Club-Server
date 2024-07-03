@@ -72,7 +72,6 @@ router.post("/signup", (req, res, next) => {
 
 
 // User login endpoint
-// User login endpoint
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
 

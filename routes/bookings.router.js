@@ -11,9 +11,6 @@ const generateUniqueBookingId = async () => {
   let bookingId;
   do {
     bookingId = new ObjectId().toString(); // Convert ObjectId to string
-    console.log("Generated booking ID:", bookingId);
-
-    // Check if booking with the same ID exists
     const existingBooking = await Booking.findOne({ bookingId });
     if (!existingBooking) {
       break; // Unique ID found
@@ -22,11 +19,12 @@ const generateUniqueBookingId = async () => {
   return bookingId;
 };
 
-// Endpoint to fetch all bookings
+// Endpoint to fetch bookings by date
 router.get('/', async (req, res) => {
+  const { date } = req.query;
   try {
-    const bookings = await Booking.find();
-    res.json(bookings);
+    const bookings = await Booking.find({ bookingDate: new Date(date) });
+    res.json({ bookings });
   } catch (error) {
     console.error('Error fetching bookings:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -36,44 +34,67 @@ router.get('/', async (req, res) => {
 // Endpoint to create a new booking
 router.post('/', async (req, res) => {
   try {
-    const { userId, seatId, bookingDate } = req.body;
+    const { userId, seatId, bookingDate, dayIndex, slotIndex } = req.body;
+
+    console.log('Incoming Request:', req.body);
 
     // Validate required data
-    if (!userId || !seatId || !bookingDate ) {
+    if (!userId || !seatId || !bookingDate || dayIndex === undefined || slotIndex === undefined) {
+      console.log('validation Failed: Missing required data');
       return res.status(400).json({ message: 'Missing required data in request body.' });
     }
 
     // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
+      console.log('Validation Failed: User not found');
       return res.status(404).json({ message: 'User not found.' });
     }
 
     // Check if seat exists
     const seat = await Seat.findById(seatId);
-    if (!seatId) {
+    if (!seatId) {                          // Here seatId is important
+      console.log('Validation Failed: Seat not found');
       return res.status(404).json({ message: 'Seat not found.' });
+    }
+
+    // Convert bookingDate to start of the day for comparison
+    const startOfDay = new Date(bookingDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    console.log('Converted Booking Date to start of day:', startOfDay);
+
+
+    // Check if user has already booked a slot on the same day
+    const existingBooking = await Booking.findOne({
+      userId,
+      bookingDate: startOfDay,
+      dayIndex,
+      slotIndex
+    });
+    console.log('Existing Booking:', existingBooking);
+
+    if (existingBooking) {
+      console.log('Validation Failed: User has already booked this slot on this day');
+      return res.status(400).json({ message: 'User has already booked a slot on this day.' });
     }
 
     // Generate a unique booking ID
     const bookingId = await generateUniqueBookingId();
-    console.log("Booking ID to be saved:", bookingId);
 
     // Create new booking
     const booking = new Booking({
       bookingId,
       userId,
       seatId,
-      bookingDate,
-      
+      bookingDate: startOfDay,
+      dayIndex,
+      slotIndex,
     });
 
     // Save booking to database
     const savedBooking = await booking.save();
-    console.log("Booking saved:", savedBooking);
-
+    console.log('Booking Created Successfully.', booking, savedBooking);
     res.status(201).json({ message: 'Booking created successfully.', booking: savedBooking });
-
   } catch (error) {
     console.error('Error creating booking:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -83,7 +104,6 @@ router.post('/', async (req, res) => {
 // Endpoint to delete a booking by ID
 router.delete('/:bookingId', async (req, res) => {
   const { bookingId } = req.params;
-
   try {
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       return res.status(400).json({ message: 'Specified ID is not valid' });
