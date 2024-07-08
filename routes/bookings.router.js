@@ -23,7 +23,27 @@ const generateUniqueBookingId = async () => {
 router.get('/', async (req, res) => {
   const { date } = req.query;
   try {
-    const bookings = await Booking.find({ bookingDate: new Date(date) });
+    if (!date) {
+      return res.status(400).json({ error: 'Date parameter is required' });
+    }
+
+    // Convert date string to Date object
+    const bookingDate = new Date(date);
+    if (isNaN(bookingDate)) {
+      return res.status(400).json({ error: 'Invalid date format' });
+    }
+
+    // Fetch bookings for the specified date
+    const startOfDay = new Date(bookingDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const bookings = await Booking.find({
+      bookingDate: { $gte: startOfDay, $lte: endOfDay }
+    });
+
     res.json({ bookings });
   } catch (error) {
     console.error('Error fetching bookings:', error);
@@ -31,19 +51,30 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+
 // Endpoint to create a new booking
 router.post('/', async (req, res) => {
   try {
-    const { userId, seatId, bookingDate, dayIndex, slotIndex } = req.body;
+    const { userId, seatId, bookingDate, dayIndex, slotIndex, userName} = req.body;
 
     console.log('Incoming Request:', req.body);
 
     // Validate required data
-    if (!userId || !seatId || !bookingDate || dayIndex === undefined || slotIndex === undefined) {
+    if (!userId || !seatId || !bookingDate || dayIndex === undefined || slotIndex === undefined || !userName) {
       console.log('validation Failed: Missing required data');
       return res.status(400).json({ message: 'Missing required data in request body.' });
     }
 
+    // Parse bookingDate into a date object
+    const parsedBookingDate = new Date(bookingDate);
+
+    // Check if the parsed date is valid
+    if (isNaN(parsedBookingDate)) {
+      return res.status(400).json({ message: 'Invalid booking date format.' });
+    }
+
+    
     // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
@@ -67,16 +98,18 @@ router.post('/', async (req, res) => {
     // Check if user has already booked a slot on the same day
     const existingBooking = await Booking.findOne({
       userId,
-      bookingDate: startOfDay,
+      seatId,
+      bookingDate: new Date().toISOString(),
       dayIndex,
-      slotIndex
+      slotIndex,
+      userName
     });
     console.log('Existing Booking:', existingBooking);
 
-    if (existingBooking) {
-      console.log('Validation Failed: User has already booked this slot on this day');
-      return res.status(400).json({ message: 'User has already booked a slot on this day.' });
-    }
+    // if (existingBooking) {
+    //   console.log('Validation Failed: User has already booked this slot on this day');
+    //   return res.status(400).json({ message: 'User has already booked a slot on this day.' });
+    // }
 
     // Generate a unique booking ID
     const bookingId = await generateUniqueBookingId();
@@ -89,6 +122,7 @@ router.post('/', async (req, res) => {
       bookingDate: startOfDay,
       dayIndex,
       slotIndex,
+      userName
     });
 
     // Save booking to database
