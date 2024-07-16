@@ -10,9 +10,10 @@ Install MongoDB from mongodb.com. Follow their installation instructions for you
 ## Setup Instructions
 Clone the Repository: Open your terminal and clone the repository to your local machine.
 
-bash
+```bash
 Copy code
 git clone https://github.com/Almere-Badminton-Club/Badminton-Club-Server.git
+```
 Navigate to the Project Directory: Move into the cloned directory.
 
 bash
