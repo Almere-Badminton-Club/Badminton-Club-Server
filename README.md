@@ -32,9 +32,9 @@ Create a .env file in the root directory of the project. You can use the followi
 
 ```bash 
 PORT=5005
-MONGODB_URI=mongodb://localhost:27017/badminton-club-server
-PORT: Port on which the server will run.(5005)
-MONGODB_URI: Connection URI for your MongoDB database.
+ORIGIN=http://localhost:5173     # PORT for frontend
+TOKEN_SECRET=<your_token_secret>
+
 ```
 
 ## Start MongoDB: 
