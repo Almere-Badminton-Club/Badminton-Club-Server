@@ -21,10 +21,13 @@ const generateUniqueBookingId = async () => {
 
 // Endpoint to fetch bookings by date
 router.get('/', async (req, res) => {
-  const { date } = req.query;
+  const { date } = req?.query;
   try {
     if (!date) {
-      return res.status(400).json({ error: 'Date parameter is required' });
+      //return res.status(400).json({ error: 'Date parameter is required' });
+
+      const bookings = await Booking.find();
+      res.json({ bookings });
     }
 
     // Convert date string to Date object
