@@ -31,6 +31,10 @@ app.use('/bookings', bookingsRouter);
 const seatsRouter = require('./routes/seats.routes');
 app.use('/seats', seatsRouter);
 
+// Mount cancelRequest routes
+const cancelRequestRouter = require('./routes/cancelRequest.routes');
+app.use('/cancel', cancelRequestRouter);
+
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
 

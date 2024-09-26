@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Booking = require('../models/Booking.model');
 const User = require('../models/User.model');
 const Seat = require('../models/Seat.model');
+const CancelRequest = require('../models/CancelRequest.model');
 const { ObjectId } = mongoose.Types;
 
 // Generate unique booking ID
@@ -135,7 +136,8 @@ router.post('/', async (req, res) => {
       bookingDate: startOfDay,
       dayIndex,
       slotIndex,
-      userName
+      userName,
+      cancelRequest: []
     });
 
     // Save booking to database
@@ -168,4 +170,6 @@ router.delete('/:bookingId', async (req, res) => {
   }
 });
 
+
 module.exports = router;
+ 

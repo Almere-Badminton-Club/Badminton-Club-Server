@@ -8,7 +8,7 @@ const bookingSchema = new Schema(
             unique: true
         },
         userId: {
-            type: Schema.Types.ObjectId, 
+            type: Schema.Types.ObjectId,
             ref: 'User', // Reference to the Users collection
             required: true
         },
@@ -33,7 +33,17 @@ const bookingSchema = new Schema(
             type: String,
             ref: 'User', // Reference to the Users collection
             required: true
-        }
+        },
+        cancelRequest: [{
+            cancelId: {
+                type: String,
+                trim: true
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now
+            },
+        }]
     });
 
 const Booking = model("Booking", bookingSchema);
