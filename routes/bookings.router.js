@@ -150,6 +150,41 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Endpoint to update a booking by ID
+router.put('/:bookingId', async (req, res) => {
+  const { bookingId } = req.params;
+  console.log("Booking ID:", bookingId);
+  const { seatId, bookingDate, dayIndex, slotIndex, userName } = req.body;
+
+  try {
+    // Check if booking is valid
+    if(!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return res.status(400).json({ message: 'Invalid booking ID' });
+    }
+
+    // Find the booking by bookingId
+    const existingBooking = await Booking.findOne({ bookingId });
+    if (!existingBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Update the booking details if provoded
+    if (seatId) existingBooking.seatId = seatId;
+    if (bookingDate) existingBooking.bookingDate = new Date(bookingDate);
+    if (dayIndex !== undefined) existingBooking.dayIndex = dayIndex;
+    if (slotIndex !== undefined) existingBooking.slotIndex = slotIndex;
+    if (userName) existingBooking.userName = userName;
+
+    // Save the updated booking
+    const updatedBooking = await existingBooking.save();
+    console.log("Booking updated successfully", updatedBooking);
+
+    res.status(200).json({ message: 'Booking updated successfully', booking: updatedBooking });
+  } catch (error) {
+    console.error('Error updating booking:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+})
 // Endpoint to delete a booking by ID
 router.delete('/:bookingId', async (req, res) => {
   const { bookingId } = req.params;

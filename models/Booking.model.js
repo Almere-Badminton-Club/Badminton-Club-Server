@@ -34,17 +34,16 @@ const bookingSchema = new Schema(
             ref: 'User', // Reference to the Users collection
             required: true
         },
-        cancelRequest: [{
+        cancelRequests: [{
             cancelId: {
-                type: String,
-                trim: true
+                type: String, ref: 'CancelRequest'
             },
             createdAt: {
                 type: Date,
                 default: Date.now
             },
-        }]
-    });
+        }],
+    }, { timestamps: true});
 
 const Booking = model("Booking", bookingSchema);
 
