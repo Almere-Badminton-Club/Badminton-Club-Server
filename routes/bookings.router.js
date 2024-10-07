@@ -22,19 +22,18 @@ const generateUniqueBookingId = async () => {
 
 // Endpoint to fetch bookings by date
 router.get('/', async (req, res) => {
-  const  {date}  = req.query;  
-  console.log("Received date query parameter:", date);
-
+  const { date } = req?.query;
   try {
     if (!date) {
-      return res.status(400).json({ error: 'Date parameter is required' });
+      //return res.status(400).json({ error: 'Date parameter is required' });
+
+      const bookings = await Booking.find();
+      res.json({ bookings });
     }
 
     // Convert date string to Date object
     const bookingDate = new Date(date);
-    console.log("Parsed booking date", bookingDate);
-
-    if (isNaN(bookingDate.getTime())) {
+    if (isNaN(bookingDate)) {
       return res.status(400).json({ error: 'Invalid date format' });
     }
 
@@ -45,20 +44,11 @@ router.get('/', async (req, res) => {
     const endOfDay = new Date(startOfDay);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
-    console.log("Start of the day:", startOfDay);
-    console.log("End of day:", endOfDay);
-
     const bookings = await Booking.find({
       bookingDate: { $gte: startOfDay, $lte: endOfDay }
     });
 
-    if (!bookings || bookings.length === 0) {
-      console.log("No bookings found for the given date." );
-      return res.status(404).json({ message: 'No biikings found for the given date'});
-    }
-    console.log("Fetched bookings", bookings);
-
-    res.status(200).json({ bookings });
+    res.json({ bookings });
   } catch (error) {
     console.error('Error fetching bookings:', error);
     res.status(500).json({ error: 'Internal Server Error' });
