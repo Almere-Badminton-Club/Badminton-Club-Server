@@ -3,7 +3,7 @@ const { Schema, model } = require("mongoose");
 const bookingSchema = new Schema(
     {
         bookingId: {
-            type: String, // or ObjectId if using MongoDB
+            type: String, 
             required: true,
             unique: true
         },
@@ -42,6 +42,10 @@ const bookingSchema = new Schema(
                 type: Date,
                 default: Date.now
             },
+            isCanceled: {
+                type: Boolean,
+                default: false,
+            }
         }],
     }, { timestamps: true});
 

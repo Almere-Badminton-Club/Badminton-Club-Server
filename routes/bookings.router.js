@@ -151,7 +151,7 @@ router.post('/', async (req, res) => {
 });
 
 // Endpoint to update a booking by ID
-router.put('/:bookingId', async (req, res) => {
+router.put('/:bookingId/cancel', async (req, res) => {
   const { bookingId } = req.params;
   console.log("Booking ID:", bookingId);
   const { seatId, bookingDate, dayIndex, slotIndex, userName } = req.body;
