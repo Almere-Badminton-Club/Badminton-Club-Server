@@ -4,7 +4,7 @@ const CancelRequest = require('../models/CancelRequest.model');
 const Booking = require('../models/Booking.model');
 
 // Endpoint to add a cancellation request
-router.post('/', async (req, res) => {
+router.put('/:bookingId/cancel', async (req, res) => {
   const { userId, bookingId, cancelId } = req.body;
 
   try {

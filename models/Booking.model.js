@@ -36,7 +36,8 @@ const bookingSchema = new Schema(
         },
         cancelRequests: [{
             cancelId: {
-                type: String, ref: 'CancelRequest'
+                type: String, ref: 'CancelRequest',
+                required: true
             },
             createdAt: {
                 type: Date,

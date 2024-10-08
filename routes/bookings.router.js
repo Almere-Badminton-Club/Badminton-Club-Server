@@ -22,7 +22,7 @@ const generateUniqueBookingId = async () => {
 
 // Endpoint to fetch bookings by date
 router.get('/', async (req, res) => {
-  const  {date}  = req.query;  
+  const { date } = req.query;
   console.log("Received date query parameter:", date);
 
   try {
@@ -53,8 +53,8 @@ router.get('/', async (req, res) => {
     });
 
     if (!bookings || bookings.length === 0) {
-      console.log("No bookings found for the given date." );
-      return res.status(404).json({ message: 'No biikings found for the given date'});
+      console.log("No bookings found for the given date.");
+      return res.status(404).json({ message: 'No biikings found for the given date' });
     }
     console.log("Fetched bookings", bookings);
 
@@ -70,7 +70,7 @@ router.get('/', async (req, res) => {
 // Endpoint to create a new booking
 router.post('/', async (req, res) => {
   try {
-    const { userId, seatId, bookingDate, dayIndex, slotIndex, userName} = req.body;
+    const { userId, seatId, bookingDate, dayIndex, slotIndex, userName } = req.body;
 
     console.log('Incoming Request:', req.body);
 
@@ -88,7 +88,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Invalid booking date format.' });
     }
 
-    
+
     // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
@@ -151,40 +151,33 @@ router.post('/', async (req, res) => {
 });
 
 // Endpoint to update a booking by ID
-router.put('/:bookingId/cancel', async (req, res) => {
-  const { bookingId } = req.params;
-  console.log("Booking ID:", bookingId);
-  const { seatId, bookingDate, dayIndex, slotIndex, userName } = req.body;
-
+// routes/bookings.js or similar
+router.put("/:bookingId/cancel", async (req, res) => {
   try {
-    // Check if booking is valid
-    if(!mongoose.Types.ObjectId.isValid(bookingId)) {
-      return res.status(400).json({ message: 'Invalid booking ID' });
+    const { bookingId } = req.params;
+    const { cancelRequest } = req.body;
+
+    const booking = await Booking.findOneAndUpdate(
+      { bookingId },
+      {
+        $push: { cancelRequests: cancelRequest },
+        $set: { isCanceled: cancelRequest.isCanceled ? `${req.body.userName} C1` : req.body.userName },
+      },
+      { new: true }
+    );
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Find the booking by bookingId
-    const existingBooking = await Booking.findOne({ bookingId });
-    if (!existingBooking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
-
-    // Update the booking details if provoded
-    if (seatId) existingBooking.seatId = seatId;
-    if (bookingDate) existingBooking.bookingDate = new Date(bookingDate);
-    if (dayIndex !== undefined) existingBooking.dayIndex = dayIndex;
-    if (slotIndex !== undefined) existingBooking.slotIndex = slotIndex;
-    if (userName) existingBooking.userName = userName;
-
-    // Save the updated booking
-    const updatedBooking = await existingBooking.save();
-    console.log("Booking updated successfully", updatedBooking);
-
-    res.status(200).json({ message: 'Booking updated successfully', booking: updatedBooking });
+    res.status(200).json({ message: "Booking canceled", booking });
   } catch (error) {
-    console.error('Error updating booking:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error", error });
   }
-})
+});
+
+
+
 // Endpoint to delete a booking by ID
 router.delete('/:bookingId', async (req, res) => {
   const { bookingId } = req.params;
@@ -207,4 +200,3 @@ router.delete('/:bookingId', async (req, res) => {
 
 
 module.exports = router;
- 
