@@ -28,14 +28,7 @@ Install the required npm packages.
 npm install
 ```
 ## Set Environment Variables: 
-Create a .env file in the root directory of the project. You can use the following example as a template. Adjust the values as per your local setup.
-
-```bash 
-PORT=5005
-ORIGIN=http://localhost:5173     # PORT for frontend
-TOKEN_SECRET=<your_token_secret>
-
-```
+Create a `.env.local` file in the root directory of the project. You can use the existing `.env` file example as a template. Adjust the values as per your local setup.
 
 ## Start MongoDB: 
 Ensure your MongoDB server is running. If not, start it according to your operating system's instructions.
@@ -53,4 +46,22 @@ This command will start the server and you should see output indicating that the
 
 ## Testing: 
 Once the server is running, you can test the endpoints using a tool like Postman or by integrating them with your frontend application.
+
+
+
+# Deploy to production
+We use [dokku](https://dokku.com/) as a baremetal deployment tool. 
+
+1. Make sure your ssh public key is added to the production machine. If not ask admin
+2. Add dokku as your git remote
+
+```
+git remote add prod-smashersclub dokku@51.20.185.99:badminton-api
+```
+3. To deploy, just to git push to dokku
+
+```
+git push prod-smashersclub
+```
+
 
