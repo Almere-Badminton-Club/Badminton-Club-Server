@@ -137,7 +137,7 @@ router.post('/', async (req, res) => {
       dayIndex,
       slotIndex,
       userName,
-      cancelRequest: []
+      cancelRequest: [],
     });
 
     // Save booking to database
@@ -150,18 +150,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Endpoint to update a booking by ID
-// routes/bookings.js or similar
+     // Endpoint to update a booking by ID
 router.put("/:bookingId/cancel", async (req, res) => {
   try {
     const { bookingId } = req.params;
     const { cancelRequest } = req.body;
+    
 
     const booking = await Booking.findOneAndUpdate(
       { bookingId },
       {
         $push: { cancelRequests: cancelRequest },
-        $set: { isCanceled: cancelRequest.isCanceled ? `${req.body.userName} C1` : req.body.userName },
+        $set: { isCanceled: cancelRequest.isCanceled ? `${req.body.userName}` : req.body.userName },
       },
       { new: true }
     );
