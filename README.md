@@ -60,16 +60,16 @@ We have two deployment pipeline setup. One is development and one is prod. Each 
 ```mermaid
 
 stateDiagram-v2
-    [*] --> Local : Local development
-    Local: localhost <small>uses .env.local</small>
+    [*] --> Local : Local development<br/><small>uses .env.local</small>
+    Local: localhost
     state Local {
         custom: As you wish
         [*] --> custom
         custom --> [*]
     }
 
-    [*] --> Development : Development testing
-    Development: <small>uses .env.development</small>
+    [*] --> Development : Development testing<br/><small>uses .env.development</small>
+    Development: Development
     state Development {
         A: browser
         B: dev-ui
@@ -80,8 +80,8 @@ stateDiagram-v2
         C --> D : <small>local mongo server</small>
     }
 
-    [*] --> Production : Production deployment
-    Production: Production <small>uses .env</small>
+    [*] --> Production : Production deployment<br/><small>uses .env</small>
+    Production: Production
     state Production {
         W: browser
         X: badminton-ui
