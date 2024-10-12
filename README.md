@@ -49,8 +49,67 @@ Once the server is running, you can test the endpoints using a tool like Postman
 
 
 
-# Deploy to production
+
+
+# Deployment 
+
 We use [dokku](https://dokku.com/) as a baremetal deployment tool. 
+
+We have two deployment pipeline setup. One is development and one is prod. Each setup contains three services ( the ui, the api and the mongo db). Application layout looks like this -
+
+```mermaid
+
+stateDiagram-v2
+    [*] --> Local : Local development
+    Local: localhost <small>uses .env.local</small>
+    state Local {
+        custom: As you wish
+        [*] --> custom
+        custom --> [*]
+    }
+
+    [*] --> Development : Development testing
+    Development: <small>uses .env.development</small>
+    state Development {
+        A: browser
+        B: dev-ui
+        C: dev-api
+        D: badminton-dev-db
+        A --> B :  <small>dev.smashersclub.com</small>
+        A --> C :  <small>dev-api.apps.smashersclub.com</small>
+        C --> D : <small>local mongo server</small>
+    }
+
+    [*] --> Production : Production deployment
+    Production: Production <small>uses .env</small>
+    state Production {
+        W: browser
+        X: badminton-ui
+        Y: badminton-api
+        Z: badminton-club-db
+        W --> X :  <small>smashersclub.com</small>
+        W --> Y :  <small>badminton-api.apps.smashersclub.com</small>
+        Y --> Z : <small>local mongo server</small>
+    }
+
+```
+
+## Deploying on [development](https://dev-api.apps.smashersclub.com)
+
+1. Make sure your ssh public key is added to the production machine. If not ask admin
+2. Add dokku as your git remote
+
+```
+git remote add dev-smashersclub dokku@51.20.185.99:dev-api
+```
+3. To deploy, just to git push to dokku
+
+```
+git push dev-smashersclub
+```
+
+
+## Deploying To [production](https://badminton-api.apps.smashersclub.com)
 
 1. Make sure your ssh public key is added to the production machine. If not ask admin
 2. Add dokku as your git remote
@@ -63,5 +122,4 @@ git remote add prod-smashersclub dokku@51.20.185.99:badminton-api
 ```
 git push prod-smashersclub
 ```
-
 
