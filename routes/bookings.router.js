@@ -1,11 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const mongoose = require('mongoose');
-const Booking = require('../models/Booking.model');
-const User = require('../models/User.model');
-const Seat = require('../models/Seat.model');
-const CancelRequest = require('../models/CancelRequest.model');
+const mongoose = require("mongoose");
+const Booking = require("../models/Booking.model");
+const User = require("../models/User.model");
+const Seat = require("../models/Seat.model");
+const CancelRequest = require("../models/CancelRequest.model");
 const { ObjectId } = mongoose.Types;
+const { convertToCET } = require("../utils/timezone");
+const { zonedTimeToUtc } = require("date-fns-tz");
+const getBookingDate = require('../utils/getBookingDate');
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
@@ -21,63 +24,56 @@ const generateUniqueBookingId = async () => {
 };
 
 // Endpoint to fetch bookings by date
-router.get('/', async (req, res) => {
-  const { date } = req.query;
-  console.log("Received date query parameter:", date);
-
+router.get("/", async (req, res) => {
   try {
+    // Extract the date from the query parameters
+    const { date } = req.query;
     if (!date) {
-      return res.status(400).json({ error: 'Date parameter is required' });
+      return res
+        .status(400)
+        .json({ message: "Date query parameter is required " });
     }
 
-    // Convert date string to Date object
-    const bookingDate = new Date(date);
-    console.log("Parsed booking date", bookingDate);
+    // Parse the date and calculate the start & end of the day
+    const cetTimeZone = "Europe/Amsterdam";
+    const parsedDate = convertToCET(date);
+    const startOfDay = utcToZonedTime(new Date(parsedDate.setHours(0, 0, 0, 0)), cetTimeZone);
+    const endOfDay = utcToZonedTime(new Date(parsedDate.setHours(23, 59, 59, 999)), cetTimeZone);
 
-    if (isNaN(bookingDate.getTime())) {
-      return res.status(400).json({ error: 'Invalid date format' });
-    }
-
-    // Fetch bookings for the specified date
-    const startOfDay = new Date(bookingDate);
-    startOfDay.setUTCHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(startOfDay);
-    endOfDay.setUTCHours(23, 59, 59, 999);
-
-    console.log("Start of the day:", startOfDay);
-    console.log("End of day:", endOfDay);
-
+    // Fetch bookings within the specified date range
     const bookings = await Booking.find({
-      bookingDate: { $gte: startOfDay, $lte: endOfDay }
+      bookingDate: { $gte: startOfDay, $lte: endOfDay },
     });
 
     if (!bookings || bookings.length === 0) {
       console.log("No bookings found for the given date.");
-      return res.status(404).json({ message: 'No biikings found for the given date' });
     }
-    console.log("Fetched bookings", bookings);
 
-    res.status(200).json({ bookings });
+    return res.status(200).json({ bookings });
   } catch (error) {
-    console.error('Error fetching bookings:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching bookings:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
-
-
 // Endpoint to create a new booking
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { userId, seatId, bookingDate, dayIndex, slotIndex, userName } = req.body;
+    const { userId, seatId, dayIndex, slotIndex, userName } = req.body;
 
     console.log('Incoming Request:', req.body);
 
+    const selectedDate = new Date();
+    const bookingDate = getBookingDate(dayIndex, selectedDate);
+
     // Validate required data
     if (!userId || !seatId || !bookingDate || dayIndex === undefined || slotIndex === undefined || !userName) {
-      console.log('validation Failed: Missing required data');
       return res.status(400).json({ message: 'Missing required data in request body.' });
+    }
+
+    // Skip Thursday (dayIndex === 3)
+    if (dayIndex === 3) {
+      return res.status(400).json({ message: 'Bookings are not allowed on Thursday.' });
     }
 
     // Parse bookingDate into a date object
@@ -88,7 +84,6 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Invalid booking date format.' });
     }
 
-
     // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
@@ -98,7 +93,7 @@ router.post('/', async (req, res) => {
 
     // Check if seat exists
     const seat = await Seat.findById(seatId);
-    if (!seatId) {                          // Here seatId is important
+    if (!seatId) {
       console.log('Validation Failed: Seat not found');
       return res.status(404).json({ message: 'Seat not found.' });
     }
@@ -108,37 +103,48 @@ router.post('/', async (req, res) => {
     startOfDay.setUTCHours(0, 0, 0, 0);
     console.log('Converted Booking Date to start of day:', startOfDay);
 
-
     // Check if user has already booked a slot on the same day
     const existingBooking = await Booking.findOne({
       userId,
       seatId,
-      bookingDate: new Date().toISOString(),
+      bookingDate,
       dayIndex,
       slotIndex,
-      userName
+      userName,
     });
-    console.log('Existing Booking:', existingBooking);
 
-    // if (existingBooking) {
-    //   console.log('Validation Failed: User has already booked this slot on this day');
-    //   return res.status(400).json({ message: 'User has already booked a slot on this day.' });
-    // }
+    // If a booking already exists, return an error message
+    if (existingBooking) {
+      console.log('Validation Failed: User has already booked this slot on this day');
+      return res.status(400).json({ message: 'User has already booked a slot on this day.' });
+    }
 
     // Generate a unique booking ID
     const bookingId = await generateUniqueBookingId();
 
-    // Create new booking
-    const booking = new Booking({
-      bookingId,
-      userId,
-      seatId,
-      bookingDate: startOfDay,
+    // Check if all regular slots are booked
+    const bookings = await Booking.find({
+      bookingDate: new Date(bookingDate),
       dayIndex,
-      slotIndex,
-      userName,
-      cancelRequest: [],
+      slotIndex: { $lt: 20 }, // Only check regular slots
     });
+
+    if (bookings.length >= 20) { // Assuming you have 20 regular slots
+      // Create a waiting list booking
+      const booking = new Booking({
+        bookingId,
+        userId,
+        seatId,
+        bookingDate: startOfDay,
+        dayIndex,
+        slotIndex,
+        userName,
+        isWaitingList: true, // Mark as waiting list
+        cancelRequests: [],
+      });
+      await booking.save();
+      return res.status(201).json({ message: 'Added to waiting list', booking });
+    }
 
     // Save booking to database
     const savedBooking = await booking.save();
@@ -150,18 +156,23 @@ router.post('/', async (req, res) => {
   }
 });
 
-     // Endpoint to update a booking by ID
+
+
+// Endpoint to update a booking by ID for cancellation
 router.put("/:bookingId/cancel", async (req, res) => {
   try {
     const { bookingId } = req.params;
     const { cancelRequest } = req.body;
-    
 
     const booking = await Booking.findOneAndUpdate(
       { bookingId },
       {
         $push: { cancelRequests: cancelRequest },
-        $set: { isCanceled: cancelRequest.isCanceled ? `${req.body.userName}` : req.body.userName },
+        $set: {
+          isCanceled: cancelRequest.isCanceled
+            ? `${req.body.userName}`
+            : req.body.userName,
+        },
       },
       { new: true }
     );
@@ -176,27 +187,26 @@ router.put("/:bookingId/cancel", async (req, res) => {
   }
 });
 
-
-
 // Endpoint to delete a booking by ID
-router.delete('/:bookingId', async (req, res) => {
+router.delete("/:bookingId", async (req, res) => {
   const { bookingId } = req.params;
   try {
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-      return res.status(400).json({ message: 'Specified ID is not valid' });
+      return res.status(400).json({ message: "Specified ID is not valid" });
     }
 
     const booking = await Booking.findOneAndDelete({ bookingId });
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      return res.status(404).json({ message: "Booking not found" });
     }
 
-    res.json({ message: `Booking with ID ${bookingId} was removed successfully.` });
+    res.json({
+      message: `Booking with ID ${bookingId} was removed successfully.`,
+    });
   } catch (error) {
-    console.error('Error deleting booking:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error deleting booking:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 module.exports = router;

@@ -35,6 +35,12 @@ app.use('/seats', seatsRouter);
 const cancelRequestRouter = require('./routes/cancelRequest.routes');
 app.use('/cancel', cancelRequestRouter);
 
+// Mount waitingRequest routes
+const waitingRouter = require('./routes/waiting.routes');
+app.use('/waiting', waitingRouter);
+
+
+
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
 

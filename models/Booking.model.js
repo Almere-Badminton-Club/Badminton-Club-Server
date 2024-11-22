@@ -34,6 +34,10 @@ const bookingSchema = new Schema(
             ref: 'User', // Reference to the Users collection
             required: true
         },
+        isWaitingUser:{
+            type: Boolean,
+            default: false
+        },
         cancelRequests: [{
             cancelId: {
                 type: String, ref: 'CancelRequest',

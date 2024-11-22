@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const CancelRequest = require('../models/CancelRequest.model'); 
 const Booking = require('../models/Booking.model');
 
 // Endpoint to add a cancellation request
