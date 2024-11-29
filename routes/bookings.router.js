@@ -149,6 +149,8 @@ router.post("/", async (req, res) => {
     // Generate a unique booking ID
     const bookingId = await generateUniqueBookingId();
 
+    let booking;
+
     // Check if all regular slots are booked
     const bookings = await Booking.find({
       bookingDate: new Date(bookingDate),
@@ -175,6 +177,20 @@ router.post("/", async (req, res) => {
         .status(201)
         .json({ message: "Added to waiting list", booking });
     }
+
+    // Create a regular booking
+    booking = new Booking({
+      bookingId,
+      userId,
+      seatId,
+      bookingDate: startOfDay,
+      dayIndex,
+      slotIndex,
+      userName,
+      isWaitingUser: false,
+      cancelRequests: [],
+    });
+    
 
     // Save booking to database
     const savedBooking = await booking.save();
