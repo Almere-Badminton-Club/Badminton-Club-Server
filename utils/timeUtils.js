@@ -1,9 +1,7 @@
-const { utcToZonedTime } = require("date-fns-tz");
+const { DateTime } = require('luxon');
 
-// Converts date to CET (Central European Time)
 function convertToCET(date) {
-  const cetTimeZone = "Europe/Amsterdam";
-  return utcToZonedTime(new Date(date), cetTimeZone); // Converts UTC date to CET time
+  return DateTime.fromJSDate(date).setZone('Europe/Amsterdam').toJSDate();
 }
 
-module.exports = { convertToCET };
+console.log(convertToCET(new Date()));  // Convert to CET time

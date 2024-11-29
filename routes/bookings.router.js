@@ -31,19 +31,25 @@ router.get("/", async (req, res) => {
         .status(400)
         .json({ message: "Date query parameter is required " });
     }
+    console.log('Received date:', date);
 
     // Parse the date and calculate the start & end of the day
     const parsedDate = convertToCET(date);
+    console.log("Converted date to CET:", parsedDate);
+
     const startOfDay = new Date(parsedDate); 
     startOfDay.setHours(0, 0, 0, 0);
+console.log("Start of day:", startOfDay);
 
     const endOfDay = new Date(parsedDate);
     endOfDay.setHours(23, 99, 99, 999);
+    console.log("End of day:", endOfDay);
 
     // Fetch bookings within the specified date range
     const bookings = await Booking.find({
       bookingDate: { $gte: startOfDay, $lte: endOfDay },
     });
+console.log("Fetched bookings:", bookings);
 
     if (!bookings || bookings.length === 0) {
       console.log("No bookings found for the given date.");
