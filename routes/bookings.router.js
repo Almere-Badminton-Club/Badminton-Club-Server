@@ -6,7 +6,6 @@ const User = require("../models/User.model");
 const Seat = require("../models/Seat.model");
 const CancelRequest = require("../models/CancelRequest.model");
 const { ObjectId } = mongoose.Types;
-const { zonedTimeToUtc } = require("date-fns-tz");
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
