@@ -75,7 +75,7 @@ router.post("/", async (req, res) => {
     console.log("Incoming Request:", req.body);
 
     const selectedDate = new Date();
-    const bookingDate = getBookingDate(dayIndex, selectedDate);
+    let bookingDate = getBookingDate(dayIndex, selectedDate);
 
     // Skip Thursday (dayIndex === 3)
     if (dayIndex === 3) {

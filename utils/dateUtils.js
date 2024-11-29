@@ -5,3 +5,5 @@ function getBookingDate(dayIndex, selectedDate) {
   bookingDate.setDate(bookingDate.getDate() + (dayIndex - bookingDate.getDay()));
   return bookingDate;
 }
+
+module.exports = { getBookingDate };
