@@ -7,7 +7,7 @@ const Seat = require("../models/Seat.model");
 const CancelRequest = require("../models/CancelRequest.model");
 const { ObjectId } = mongoose.Types;
 const { convertToCET } = require("../utils/timeUtils");
-const { getBookingDate } = require("../utils/dateUtils");
+const  getBookingDate  = require("../utils/dateUtils");
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
@@ -176,8 +176,8 @@ router.post("/", async (req, res) => {
     }
 
     // Save booking to database
-    const savedBooking = await booking.save();
-    console.log("Booking Created Successfully.", booking, savedBooking);
+    const savedBooking = await bookings.save();
+    console.log("Booking Created Successfully.", bookings, savedBooking);
     res
       .status(201)
       .json({
