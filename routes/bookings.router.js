@@ -123,7 +123,7 @@ router.post("/", async (req, res) => {
 
     // Convert bookingDate to start of the day for comparison
     const startOfDay = new Date(bookingDate);
-    startOfDay.setUTCHours(0, 0, 0, 0);
+    startOfDay.setHours(0, 0, 0, 0);
     console.log("Converted Booking Date to start of day:", startOfDay);
 
     // Check if user has already booked a slot on the same day
@@ -190,7 +190,7 @@ router.post("/", async (req, res) => {
       isWaitingUser: false,
       cancelRequests: [],
     });
-    
+
 
     // Save booking to database
     const savedBooking = await booking.save();
