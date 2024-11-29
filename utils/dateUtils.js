@@ -2,8 +2,9 @@
 function getBookingDate(dayIndex, selectedDate) {
   const bookingDate = new Date(selectedDate);
   // Set the day of the week based on dayIndex
-  bookingDate.setDate(bookingDate.getDate() + (dayIndex - bookingDate.getDay()));
+  bookingDate.setDate(bookingDate.getDate());
   return bookingDate;
 }
 
 module.exports = { getBookingDate };
+

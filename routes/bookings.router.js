@@ -74,9 +74,9 @@ router.post("/", async (req, res) => {
 
     console.log("Incoming Request:", req.body);
 
-    const selectedDate = new Date();
+     const selectedDate = new Date();
     let bookingDate = getBookingDate(dayIndex, selectedDate);
-    console.log('bookingDate is......', bookingDate);
+    console.log('bookingDate is......', dayIndex, bookingDate);
 
     // Skip Thursday (dayIndex === 3)
     if (dayIndex === 3) {
@@ -121,10 +121,10 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ message: "Seat not found." });
     }
 
-    // Convert bookingDate to start of the day for comparison
-    const startOfDay = new Date(bookingDate);
-    startOfDay.setHours(0, 0, 0, 0);
-    console.log("Converted Booking Date to start of day:", startOfDay);
+    // // Convert bookingDate to start of the day for comparison
+    // const startOfDay = new Date(bookingDate);
+    // startOfDay.setHours(0, 0, 0, 0);
+    // console.log("Converted Booking Date to start of day:", startOfDay);
 
     // Check if user has already booked a slot on the same day
     const existingBooking = await Booking.findOne({
