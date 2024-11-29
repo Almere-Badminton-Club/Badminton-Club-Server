@@ -6,6 +6,7 @@ const User = require("../models/User.model");
 const Seat = require("../models/Seat.model");
 const CancelRequest = require("../models/CancelRequest.model");
 const { ObjectId } = mongoose.Types;
+const { convertToCET } = require("../utils/timeUtils");
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
@@ -32,10 +33,12 @@ router.get("/", async (req, res) => {
     }
 
     // Parse the date and calculate the start & end of the day
-    const cetTimeZone = "Europe/Amsterdam";
     const parsedDate = convertToCET(date);
-    const startOfDay = utcToZonedTime(new Date(parsedDate.setHours(0, 0, 0, 0)), cetTimeZone);
-    const endOfDay = utcToZonedTime(new Date(parsedDate.setHours(23, 59, 59, 999)), cetTimeZone);
+    const startOfDay = new Date(parsedDate); 
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(parsedDate);
+    endOfDay.setHours(23, 99, 99, 999);
 
     // Fetch bookings within the specified date range
     const bookings = await Booking.find({
