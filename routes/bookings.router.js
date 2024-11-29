@@ -6,9 +6,7 @@ const User = require("../models/User.model");
 const Seat = require("../models/Seat.model");
 const CancelRequest = require("../models/CancelRequest.model");
 const { ObjectId } = mongoose.Types;
-const { convertToCET } = require("../utils/timezone");
 const { zonedTimeToUtc } = require("date-fns-tz");
-const getBookingDate = require('../utils/getBookingDate');
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
@@ -48,6 +46,8 @@ router.get("/", async (req, res) => {
     if (!bookings || bookings.length === 0) {
       console.log("No bookings found for the given date.");
     }
+
+    console.log("Bookings fetched for the date range----:", bookings);
 
     return res.status(200).json({ bookings });
   } catch (error) {
