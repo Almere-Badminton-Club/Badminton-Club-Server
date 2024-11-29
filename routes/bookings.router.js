@@ -23,9 +23,11 @@ const generateUniqueBookingId = async () => {
 
 // Endpoint to fetch bookings by date
 router.get("/", async (req, res) => {
+  const  date  = req.query.date;
+
   try {
+    const convertedDate = convertToCET(date);
     // Extract the date from the query parameters
-    const { date } = req.query;
     if (!date) {
       return res
         .status(400)
