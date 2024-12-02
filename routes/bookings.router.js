@@ -49,6 +49,7 @@ router.get("/", async (req, res) => {
     // Fetch bookings within the specified date range
     const bookings = await Booking.find({
       bookingDate: { $gte: startOfDay, $lte: endOfDay },
+      dayIndex: { $ne: 3 },
     });
     console.log("Fetched bookings:", bookings);
 
@@ -124,14 +125,15 @@ router.post("/", async (req, res) => {
     console.log("Converted Booking Date to start of day:", startOfDay);
 
     // Check if user has already booked a slot on the same day
-    const existingBooking = await Booking.findOne({
+    const regularBookings = await Booking.findOne({
       userId,
       seatId,
       bookingDate: parsedBookingDate,
       dayIndex: adjustedDayIndex,
-      slotIndex,
+      slotIndex: { $lt: 20 },
       userName,
     });
+
 
     // If a booking already exists, return an error message
     if (existingBooking) {
@@ -148,25 +150,19 @@ router.post("/", async (req, res) => {
 
     let booking;
 
-    // Check if all regular slots are booked
-    const bookings = await Booking.find({
-      bookingDate: parsedBookingDate,
-      dayIndex: adjustedDayIndex,
-      slotIndex: { $lt: 20 }, // Only check regular slots
-    });
 
-    if (bookings.length >= 20) {
-      // Assuming you have 20 regular slots
+    if (regularBookings >= 19) {
+      // after 20 regular slots booked, start booking waiting slot
       // Create a waiting list booking
-      const booking = new Booking({
-        bookingId,
+       booking = new Booking({
+        bookingId: await generateUniqueBookingId(),
         userId,
         seatId,
         bookingDate: parsedBookingDate,
         dayIndex: adjustedDayIndex,
         slotIndex,
         userName,
-        isWaitingList: true, // Mark as waiting list
+        isWaitingUser: true, // Mark as waiting list
         cancelRequests: [],
       });
       await booking.save();
@@ -177,7 +173,7 @@ router.post("/", async (req, res) => {
 
     // Create a regular booking
     booking = new Booking({
-      bookingId,
+      bookingId: await generateUniqueBookingId(),
       userId,
       seatId,
       bookingDate: parsedBookingDate,
