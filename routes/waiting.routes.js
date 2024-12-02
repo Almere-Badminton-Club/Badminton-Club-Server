@@ -45,31 +45,25 @@ router.post("/", async (req, res) => {
             "Waiting list is full. Cannot add more users to waiting list.",
         });
       }
-    } else {
-      // Handle booking for regular slots( 0-19)
-      const regularBookings = await Booking.find({
-        bookingDate,
-        dayIndex,
-        slotIndex: { $lt: 20 },
-      });
 
-      // Create and save the new booking document
-      const newBooking = new Booking({
+      // Create and save new waiting list booking
+      const newWaitingBooking = new Booking({
         userId,
         userName,
         dayIndex,
         slotIndex,
         bookingDate,
+        isWaitingUser: true,
       });
 
-      // Save the booking to the database
-      await newBooking.save();
+      //save the waiting list booking
+      await newWaitingBooking.save();
       res.status(200).json({
         success: true,
-        booking: newBooking,
-        message: "Booking created successfully.",
+        booking: newWaitingBooking,
+        message: 'Booking created successfully in the waiting list.',
       });
-    }
+    } 
   } catch (error) {
     console.error("Error creating booking.", error);
     res
