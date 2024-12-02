@@ -68,25 +68,26 @@ router.get("/", async (req, res) => {
 // Endpoint to create a new booking
 router.post("/", async (req, res) => {
   try {
-    const { userId, seatId, dayIndex, slotIndex, userName } = req.body;
+    const { userId, seatId, bookingDate, dayIndex, slotIndex, userName } = req.body;
 
     console.log("Incoming Request:", req.body);
 
-    
+    // Skip thursday
+    let adjustedDayIndex = dayIndex;
+    let adjustedBookingDate = new Date(bookingDate);
 
-    // Skip Thursday (dayIndex === 3)
     if (dayIndex === 3) {
-      dayIndex += 1;
-      selectedDate.setDate(selectedDate.getDate() + 1);
-      console.log("Booking date adjusted to friday:", bookingDate);
+      adjustedDayIndex += 1;
+      adjustedBookingDate.setDate(adjustedBookingDate.getDate() + 1);
+      console.log("Booking date adjusted to friday:", adjustedBookingDate);
     }
 
     // Validate required data
     if (
       !userId ||
       !seatId ||
-      !selectedDate ||
-      dayIndex === undefined ||
+      !bookingDate ||
+      adjustedDayIndex === undefined ||
       slotIndex === undefined ||
       !userName
     ) {
@@ -96,7 +97,7 @@ router.post("/", async (req, res) => {
     }
 
     // Parse bookingDate into a date object
-    const parsedBookingDate = new Date(bookingDate);
+    const parsedBookingDate = new Date(adjustedBookingDate);
 
     // Check if the parsed date is valid
     if (isNaN(parsedBookingDate)) {
@@ -126,8 +127,8 @@ router.post("/", async (req, res) => {
     const existingBooking = await Booking.findOne({
       userId,
       seatId,
-      bookingDate,
-      dayIndex,
+      bookingDate: parsedBookingDate,
+      dayIndex: adjustedDayIndex,
       slotIndex,
       userName,
     });
@@ -149,8 +150,8 @@ router.post("/", async (req, res) => {
 
     // Check if all regular slots are booked
     const bookings = await Booking.find({
-      bookingDate: new Date(bookingDate),
-      dayIndex,
+      bookingDate: parsedBookingDate,
+      dayIndex: adjustedDayIndex,
       slotIndex: { $lt: 20 }, // Only check regular slots
     });
 
@@ -161,8 +162,8 @@ router.post("/", async (req, res) => {
         bookingId,
         userId,
         seatId,
-        bookingDate: startOfDay,
-        dayIndex,
+        bookingDate: parsedBookingDate,
+        dayIndex: adjustedDayIndex,
         slotIndex,
         userName,
         isWaitingList: true, // Mark as waiting list
@@ -180,7 +181,7 @@ router.post("/", async (req, res) => {
       userId,
       seatId,
       bookingDate: parsedBookingDate,
-      dayIndex,
+      dayIndex: adjustedDayIndex,
       slotIndex,
       userName,
       isWaitingUser: false,
