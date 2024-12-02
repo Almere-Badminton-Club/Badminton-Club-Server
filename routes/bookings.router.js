@@ -7,7 +7,6 @@ const Seat = require("../models/Seat.model");
 const CancelRequest = require("../models/CancelRequest.model");
 const { ObjectId } = mongoose.Types;
 const { convertToCET } = require("../utils/timeUtils");
-const { getBookingDate }  = require("../utils/dateUtils");
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
@@ -38,7 +37,6 @@ router.get("/", async (req, res) => {
 
     // Parse the date and calculate the start & end of the day
     const parsedDate = convertToCET(date);
-    console.log("Converted date to CET:", parsedDate);
 
     const startOfDay = new Date(parsedDate);
     startOfDay.setHours(0, 0, 0, 0);
@@ -74,14 +72,12 @@ router.post("/", async (req, res) => {
 
     console.log("Incoming Request:", req.body);
 
-     const selectedDate = new Date();
-    let bookingDate = getBookingDate(dayIndex, selectedDate);
-    console.log('bookingDate is......', dayIndex, bookingDate);
+    
 
     // Skip Thursday (dayIndex === 3)
     if (dayIndex === 3) {
       dayIndex += 1;
-      bookingDate.setDate(bookingDate.getDate() + 1);
+      selectedDate.setDate(selectedDate.getDate() + 1);
       console.log("Booking date adjusted to friday:", bookingDate);
     }
 
@@ -89,7 +85,7 @@ router.post("/", async (req, res) => {
     if (
       !userId ||
       !seatId ||
-      !bookingDate ||
+      !selectedDate ||
       dayIndex === undefined ||
       slotIndex === undefined ||
       !userName
@@ -121,10 +117,10 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ message: "Seat not found." });
     }
 
-    // // Convert bookingDate to start of the day for comparison
-    // const startOfDay = new Date(bookingDate);
-    // startOfDay.setHours(0, 0, 0, 0);
-    // console.log("Converted Booking Date to start of day:", startOfDay);
+    // Convert bookingDate to start of the day for comparison
+    const startOfDay = new Date(bookingDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    console.log("Converted Booking Date to start of day:", startOfDay);
 
     // Check if user has already booked a slot on the same day
     const existingBooking = await Booking.findOne({
@@ -183,7 +179,7 @@ router.post("/", async (req, res) => {
       bookingId,
       userId,
       seatId,
-      bookingDate: startOfDay,
+      bookingDate: parsedBookingDate,
       dayIndex,
       slotIndex,
       userName,
