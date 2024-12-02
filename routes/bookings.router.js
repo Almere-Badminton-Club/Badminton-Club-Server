@@ -124,37 +124,16 @@ router.post("/", async (req, res) => {
     startOfDay.setHours(0, 0, 0, 0);
     console.log("Converted Booking Date to start of day:", startOfDay);
 
-    // Check if user has already booked a slot on the same day
-    const existingBooking = await Booking.findOne({
-      userId,
+    const regularBookings = await Booking.find({
       seatId,
       bookingDate: parsedBookingDate,
       dayIndex: adjustedDayIndex,
-      slotIndex: { $lt: 20 },
-      userName,
+      slotIndex: { $lt: 20 }, // Only check the regular slots
     });
-
-
-    // If a booking already exists, return an error message
-    if (existingBooking) {
-      console.log(
-        "Validation Failed: User has already booked this slot on this day"
-      );
-      return res
-        .status(400)
-        .json({ message: "User has already booked a slot on this day." });
-    }
-
-    // Generate a unique booking ID
-    const bookingId = await generateUniqueBookingId();
-
     let booking;
-
-
-    if (existingBooking >= 19) {
-      // after 20 regular slots booked, start booking waiting slot
-      // Create a waiting list booking
-       booking = new Booking({
+    if (regularBookings.length >= 20) {
+      // All regular slots are taken, so treat this as a waiting list booking
+      booking = new Booking({
         bookingId: await generateUniqueBookingId(),
         userId,
         seatId,
@@ -166,34 +145,24 @@ router.post("/", async (req, res) => {
         cancelRequests: [],
       });
       await booking.save();
-      return res
-        .status(201)
-        .json({ message: "Added to waiting list", booking });
-    }
-
-    // Create a regular booking
-    booking = new Booking({
-      bookingId: await generateUniqueBookingId(),
-      userId,
-      seatId,
-      bookingDate: parsedBookingDate,
-      dayIndex: adjustedDayIndex,
-      slotIndex,
-      userName,
-      isWaitingUser: false,
-      cancelRequests: [],
-    });
-
-
-    // Save booking to database
-    const savedBooking = await booking.save();
-    console.log("Booking Created Successfully.", booking, savedBooking);
-    res
-      .status(201)
-      .json({
-        message: "Booking created successfully.",
-        booking: savedBooking,
+      return res.status(201).json({ message: "Added to waiting list", booking });
+    } else {
+      // Create regular booking if there are available slots
+      booking = new Booking({
+        bookingId: await generateUniqueBookingId(),
+        userId,
+        seatId,
+        bookingDate: parsedBookingDate,
+        dayIndex: adjustedDayIndex,
+        slotIndex,
+        userName,
+        isWaitingUser: false, // Mark as regular booking
+        cancelRequests: [],
       });
+      await booking.save();
+      return res.status(201).json({ message: "Booking created successfully.", booking });
+    }
+    
   } catch (error) {
     console.error("Error creating booking:", error);
     res.status(500).json({ error: "Internal Server Error" });
