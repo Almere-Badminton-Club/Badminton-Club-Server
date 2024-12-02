@@ -125,7 +125,7 @@ router.post("/", async (req, res) => {
     console.log("Converted Booking Date to start of day:", startOfDay);
 
     // Check if user has already booked a slot on the same day
-    const regularBookings = await Booking.findOne({
+    const existingBooking = await Booking.findOne({
       userId,
       seatId,
       bookingDate: parsedBookingDate,
