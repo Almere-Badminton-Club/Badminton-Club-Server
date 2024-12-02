@@ -151,7 +151,7 @@ router.post("/", async (req, res) => {
     let booking;
 
 
-    if (regularBookings >= 19) {
+    if (existingBooking >= 19) {
       // after 20 regular slots booked, start booking waiting slot
       // Create a waiting list booking
        booking = new Booking({
