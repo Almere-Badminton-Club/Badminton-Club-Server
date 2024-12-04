@@ -133,8 +133,10 @@ router.post("/", async (req, res) => {
     });
     let booking;
     console.log('regularBookings are:', regularBookings );
-    
-    if (regularBookings.length >= 20) {
+    console.log('slotIndex are:', slotIndex );
+
+    if (regularBookings.length >= 20 || slotIndex >= 20) {
+      console.log('proceeding with waiting booking.');
       // All regular slots are taken, so treat this as a waiting list booking
       booking = new Booking({
         bookingId: await generateUniqueBookingId(),
@@ -149,8 +151,12 @@ router.post("/", async (req, res) => {
       });
       console.log('Data passed to mongodb---------------:', booking)
       await booking.save();
+      const savedBooking = await Booking.findById(booking._id);
+      console.log('Saved booking waiting list:', savedBooking);
       return res.status(201).json({ message: "Added to waiting list", booking });
+
     } else {
+      console.log('proceeding with regular booking.');
       // Create regular booking if there are available slots
       booking = new Booking({
         bookingId: await generateUniqueBookingId(),
@@ -163,7 +169,10 @@ router.post("/", async (req, res) => {
         isWaitingUser: false, // Mark as regular booking
         cancelRequests: [],
       });
+      console.log('Booking object before saving regular booking:', booking);
       await booking.save();
+      const savedBooking = await Booking.findById(booking._id);
+      console.log('Saved regular booking:', savedBooking);
       return res.status(201).json({ message: "Booking created successfully.", booking });
     }
     
