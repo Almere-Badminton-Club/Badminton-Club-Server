@@ -125,17 +125,10 @@ router.post("/", async (req, res) => {
     startOfDay.setHours(0, 0, 0, 0);
     console.log("Converted Booking Date to start of day:", startOfDay);
 
-    const regularBookings = await Booking.find({
-      seatId,
-      bookingDate: parsedBookingDate,
-      dayIndex: adjustedDayIndex,
-      slotIndex: { $lt: 20 }, // Only check the regular slots
-    });
+    
     let booking;
-    console.log('regularBookings are:', regularBookings );
-    console.log('slotIndex are:', slotIndex );
-
-    if (regularBookings.length >= 20 || slotIndex >= 20) {
+    
+    if ( slotIndex >= 20) {
       console.log('proceeding with waiting booking.');
       // All regular slots are taken, so treat this as a waiting list booking
       booking = new Booking({
@@ -149,7 +142,7 @@ router.post("/", async (req, res) => {
         isWaitingUser: true, // Mark as waiting list
         cancelRequests: [],
       });
-      console.log('Data passed to mongodb---------------:', booking)
+      console.log('Data passed to mongodb:', booking)
       await booking.save();
       const savedBooking = await Booking.findById(booking._id);
       console.log('Saved booking waiting list:', savedBooking);
