@@ -144,6 +144,7 @@ router.post("/", async (req, res) => {
         isWaitingUser: true, // Mark as waiting list
         cancelRequests: [],
       });
+      console.log('Data passed to mongodb---------------:', booking)
       await booking.save();
       return res.status(201).json({ message: "Added to waiting list", booking });
     } else {
