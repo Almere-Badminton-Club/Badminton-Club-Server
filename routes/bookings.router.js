@@ -99,6 +99,7 @@ router.post("/", async (req, res) => {
 
     // Parse bookingDate into a date object
     const parsedBookingDate = new Date(adjustedBookingDate);
+    console.log('adjustedBookingDate is:', adjustedBookingDate );
 
     // Check if the parsed date is valid
     if (isNaN(parsedBookingDate)) {
@@ -131,6 +132,8 @@ router.post("/", async (req, res) => {
       slotIndex: { $lt: 20 }, // Only check the regular slots
     });
     let booking;
+    console.log('regularBookings are:', regularBookings );
+    
     if (regularBookings.length >= 20) {
       // All regular slots are taken, so treat this as a waiting list booking
       booking = new Booking({
