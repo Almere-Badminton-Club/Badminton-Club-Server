@@ -8,7 +8,6 @@ require("./db");
 // Handles http requests (express is node js framework)
 // https://www.npmjs.com/package/express
 const express = require("express");
-const path = require("path");
 
 const { isAuthenticated } = require("./middleware/jwt.middleware");
 
@@ -17,13 +16,7 @@ const app = express();
 // ℹ️ This function is getting exported from the config folder. It runs most pieces of middleware
 require("./config")(app);
 
-// Serve static files from the 'frontend' folder
-app.use(express.static(path.join(__dirname, 'frontend')));
 
-// For any other request, send back the 'index.html'
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
-});
 
 // 👇 Start handling routes here
 const indexRoutes = require("./routes/index.routes");
