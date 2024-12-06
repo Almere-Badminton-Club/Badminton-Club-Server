@@ -207,8 +207,36 @@ router.put("/:bookingId/cancel", async (req, res) => {
 
 // Endpoint to update replaced booking 
 router.put("/:bookingId/replace", async (req, res) => {
-  console.log('connection successful.');
-})
+try {
+  const { bookingId } = req.params;
+  const { userId, userName, isWaitingUser, isCanceled } = req.body;
+
+  const booking = await Booking.findByIdAndUpdate(
+    { bookingId },
+    {
+      $set: {
+        userId,
+        userName,
+        isWaitingUser: isWaitingUser || false,
+        isCanceled: isCanceled || false,
+      },
+    },
+    { new: true }
+  );
+  if(!booking) {
+    return res.status(404).json({
+      message: 'Booking not found'
+    });
+  }
+  res.status(200).json({
+    message: "Booking replaced successfully",
+    booking,
+  });
+} catch(error){
+  console.error('Error replacing booking', error);
+  res.status(500).json({ error: 'Internal server error'});
+}
+});
 
 // Endpoint to delete a booking by ID
 router.delete("/:bookingId", async (req, res) => {
