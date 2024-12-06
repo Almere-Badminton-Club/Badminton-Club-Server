@@ -41,6 +41,9 @@ app.use('/cancel', cancelRequestRouter);
 const waitingRouter = require('./routes/waiting.routes');
 app.use('/waiting', waitingRouter);
 
+// Mount replace routes
+const replaceRouter = require('./routes/replace.routes');
+app.use('/replace', replaceRouter);
 
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes

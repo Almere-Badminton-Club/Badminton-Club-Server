@@ -205,6 +205,11 @@ router.put("/:bookingId/cancel", async (req, res) => {
   }
 });
 
+// Endpoint to update replaced booking 
+router.put("/:bookingId/replace", async (req, res) => {
+  console.log('connection successful.');
+})
+
 // Endpoint to delete a booking by ID
 router.delete("/:bookingId", async (req, res) => {
   const { bookingId } = req.params;
