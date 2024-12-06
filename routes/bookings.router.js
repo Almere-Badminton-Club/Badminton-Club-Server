@@ -207,36 +207,30 @@ router.put("/:bookingId/cancel", async (req, res) => {
 
 // Endpoint to update replaced booking 
 router.put("/:bookingId/replace", async (req, res) => {
-try {
-  const { bookingId } = req.params;
-  const { userId, userName, isWaitingUser, isCanceled } = req.body;
+  try {
+    const { bookingId } = req.params;
+    const { replacementData } = req.body;
 
-  const booking = await Booking.findByIdAndUpdate(
-    { bookingId },
-    {
-      $set: {
-        userId,
-        userName,
-        isWaitingUser: isWaitingUser || false,
-        isCanceled: isCanceled || false,
-      },
-    },
-    { new: true }
-  );
-  if(!booking) {
-    return res.status(404).json({
-      message: 'Booking not found'
-    });
+    console.log("Replacing booking for bookingId:", bookingId);
+
+    // Find and update the booking by bookingId (not _id)
+    const booking = await Booking.findOneAndUpdate(
+      { bookingId }, // Query explicitly by bookingId
+      { $set: replacementData }, // Replace with new data
+      { new: true } // Return the updated document
+    );
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.status(200).json({ message: "Booking replaced successfully", booking });
+  } catch (error) {
+    console.error("Error replacing booking:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-  res.status(200).json({
-    message: "Booking replaced successfully",
-    booking,
-  });
-} catch(error){
-  console.error('Error replacing booking', error);
-  res.status(500).json({ error: 'Internal server error'});
-}
 });
+
 
 // Endpoint to delete a booking by ID
 router.delete("/:bookingId", async (req, res) => {
