@@ -209,14 +209,30 @@ router.put("/:bookingId/cancel", async (req, res) => {
 router.put("/:bookingId/replace", async (req, res) => {
   try {
     const { bookingId } = req.params;
-    const { replacementData } = req.body;
+    const { userId, userName, slotIndex, bookingDate } = req.body;
 
     console.log("Replacing booking for bookingId:", bookingId);
+
+    // Validate required fields
+    if (!userId, !userName, !slotIndex, !bookingDate ) {
+      return res.status(400).json({
+        message: 'MissingRequired fields.'
+      });
+    }
+
+    // update the specified fields
+    const updatedFields = {
+      userId,
+      userName,
+      slotIndex,
+      bookingDate,
+      isWaitingUser: false,
+    };
 
     // Find and update the booking by bookingId (not _id)
     const booking = await Booking.findOneAndUpdate(
       { bookingId }, // Query explicitly by bookingId
-      { $set: replacementData }, // Replace with new data
+      { $set: updatedFields }, // Replace with new data
       { new: true } // Return the updated document
     );
 
