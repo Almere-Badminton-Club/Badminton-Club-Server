@@ -212,6 +212,7 @@ router.put("/:bookingId/replace", async (req, res) => {
     const { userId, userName, slotIndex, bookingDate } = req.body;
 
     console.log("Replacing booking for bookingId:", bookingId);
+    console.log('Request body for replaced booking:', req.body);
 
     // Validate required fields
     if (!userId, !userName, !slotIndex, !bookingDate ) {
@@ -227,7 +228,9 @@ router.put("/:bookingId/replace", async (req, res) => {
       slotIndex,
       bookingDate,
       isWaitingUser: false,
+      isCanceled: false,
     };
+    console.log('updated fields  for canceled booking are:', updatedFields);
 
     // Find and update the booking by bookingId (not _id)
     const booking = await Booking.findOneAndUpdate(
