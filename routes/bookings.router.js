@@ -56,15 +56,21 @@ router.get("/", async (req, res) => {
       bookingDate: { $gte: startOfDay, $lte: endOfDay },
       dayIndex: { $ne: 3 },
     });
-    console.log("Fetched bookings:", bookings);
+
+    // Convert the UTC bookingDate to CET for each booking
+    const bookingsWithCETDate = bookings.map(booking => {
+      const cetBookingDate = utcToZonedTime(booking.bookingDate, 'Europe/Amsterdam');
+      booking.bookingDate = cetBookingDate;
+      return booking;
+    })
+
+    console.log("Fetched bookings:", bookingsWithCETDate);
 
     if (!bookings || bookings.length === 0) {
       console.log("No bookings found for the given date.");
     }
 
-    console.log("Bookings fetched for the date range----:", bookings);
-
-    return res.status(200).json({ bookings });
+    return res.status(200).json({ bookings: bookingsWithCETDate });
   } catch (error) {
     console.error("Error fetching bookings:", error);
     return res.status(500).json({ error: "Internal server error" });
