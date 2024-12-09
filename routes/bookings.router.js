@@ -28,7 +28,6 @@ router.get("/", async (req, res) => {
   const date = req.query.date;
 
   try {
-    const convertedDate = convertToCET(date);
     // Extract the date from the query parameters
     if (!date) {
       return res
@@ -37,9 +36,13 @@ router.get("/", async (req, res) => {
     }
     console.log("Received date:", date);
 
-    // Parse the date and calculate the start & end of the day
-    const parsedDate = convertToCET(date);
+    
 
+    // Convert the query date to CET
+    const parsedDate = convertToCET(new Date(date));
+    console.log('Parsed date in CET:', parsedDate);
+
+    // Calculate the start and end of the day in CET
     const startOfDay = new Date(parsedDate);
     startOfDay.setHours(0, 0, 0, 0);
     console.log("Start of day:", startOfDay);
