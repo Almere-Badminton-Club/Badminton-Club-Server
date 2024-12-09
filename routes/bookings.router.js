@@ -7,6 +7,7 @@ const Seat = require("../models/Seat.model");
 const CancelRequest = require("../models/CancelRequest.model");
 const { ObjectId } = mongoose.Types;
 const { convertToCET } = require("../utils/timeUtils");
+const { utcToZonedTime } = require("date-fns-tz");
 
 // Generate unique booking ID
 const generateUniqueBookingId = async () => {
@@ -20,6 +21,7 @@ const generateUniqueBookingId = async () => {
   } while (true);
   return bookingId;
 };
+
 
 // Endpoint to fetch bookings by date
 router.get("/", async (req, res) => {
@@ -106,6 +108,9 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Invalid booking date format." });
     }
 
+    const cetBookingDate = convertToCET(parsedBookingDate);
+    console.log("Booking date in CET:", cetBookingDate);
+
     // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
@@ -120,11 +125,6 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ message: "Seat not found." });
     }
 
-    // Convert bookingDate to start of the day for comparison
-    const startOfDay = new Date(bookingDate);
-    startOfDay.setHours(0, 0, 0, 0);
-    console.log("Converted Booking Date to start of day:", startOfDay);
-
     
     let booking;
     
@@ -135,7 +135,7 @@ router.post("/", async (req, res) => {
         bookingId: await generateUniqueBookingId(),
         userId,
         seatId,
-        bookingDate: parsedBookingDate,
+        bookingDate: cetBookingDate,
         dayIndex: adjustedDayIndex,
         slotIndex,
         userName,
@@ -155,7 +155,7 @@ router.post("/", async (req, res) => {
         bookingId: await generateUniqueBookingId(),
         userId,
         seatId,
-        bookingDate: parsedBookingDate,
+        bookingDate: cetBookingDate,
         dayIndex: adjustedDayIndex,
         slotIndex,
         userName,
