@@ -61,6 +61,7 @@ router.put("/:bookingId/replace", async (req, res) => {
     canceledBooking.userName = waitingUserBooking.userName;
     canceledBooking.isCanceled = false;
     canceledBooking.isWaitingUser = false;
+    canceledBooking.slotIndex = canceledBooking.slotIndex;
 
     // Save the updated canceled booking
     const updatedBooking = await canceledBooking.save();
