@@ -11,11 +11,11 @@ const saltRounds = 10;
 
 // User registration endpoint
 router.post("/signup", (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, userType} = req.body;
 
   // Check if email, password, and name are provided
-  if (email === '' || password === '' || name === '') {
-    res.status(400).json({ message: "Provide email, password and name" });
+  if (email === '' || password === '' || name === '' || userType === '') {
+    res.status(400).json({ message: "Provide email, password, name and userType" });
     return;
   }
 
@@ -47,7 +47,7 @@ router.post("/signup", (req, res, next) => {
 
       
       // Create a new user
-      return User.create({ email, password: hashedPassword, name });
+      return User.create({ email, password: hashedPassword, name, userType });
     })
     .then(newUser => {
       if (!newUser){
@@ -57,10 +57,10 @@ router.post("/signup", (req, res, next) => {
       }
       // Deconstruct the newly created user object to omit the password
       // We should never expose passwords publicly
-      const { email, name, _id } = newUser;
+      const { email, name, _id, userType} = newUser;
 
       // Create a new object that doesn't expose the password
-      const user = { email, name, _id };
+      const user = { email, name, _id, userType};
 
       // Return success response
       res.status(201).json({ message: "User registered successfully.", user: user });
