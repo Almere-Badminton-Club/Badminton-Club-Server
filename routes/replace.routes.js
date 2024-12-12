@@ -11,7 +11,7 @@ router.put("/:bookingId/replace", async (req, res) => {
   try {
     
     // Validate input data
-    if (!userId || !userName) {
+    if ( !userId || !userName || !isCanceled || !isWaitingUser ) {
       return res.status(400).json({
         success: false,
         message: "userId and userName are required.",

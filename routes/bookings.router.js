@@ -227,7 +227,7 @@ router.put("/:bookingId/replace", async (req, res) => {
     // Validate required fields
     if ((!userId, !userName, !isCanceled, !isWaitingUser)) {
       return res.status(400).json({
-        message: "MissingRequired fields.",
+        message: " Missing Required fields.",
       });
     }
 
