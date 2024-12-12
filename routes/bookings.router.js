@@ -216,7 +216,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
 });
 
 // Endpoint to update replaced booking
-router.put("/:bookingId/replace", async (req, res) => {
+router.put("/:bookingDate/replace", async (req, res) => {
   try {
     const { bookingDate } = req.params;
     const { userId, userName } = req.body;
