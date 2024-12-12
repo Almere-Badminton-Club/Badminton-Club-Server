@@ -56,11 +56,11 @@ router.get("/", async (req, res) => {
 
     // Convert the UTC bookingDate to CET for each booking
     const bookingsWithCETDate = bookings.map((booking) => {
-      const cetBookingDate = utcToZonedTime(
+      const cetbookingDate = utcToZonedTime(
         booking.bookingDate,
         "Europe/Amsterdam"
       );
-      booking.bookingDate = cetBookingDate;
+      booking.bookingDate = cetbookingDate;
       return booking;
     });
 
@@ -87,12 +87,12 @@ router.post("/", async (req, res) => {
 
     // Skip thursday
     let adjustedDayIndex = dayIndex;
-    let adjustedBookingDate = new Date(bookingDate);
+    let adjustedbookingDate = new Date(bookingDate);
 
     if (dayIndex === 3) {
       adjustedDayIndex += 1;
-      adjustedBookingDate.setDate(adjustedBookingDate.getDate() + 1);
-      console.log("Booking date adjusted to friday:", adjustedBookingDate);
+      adjustedbookingDate.setDate(adjustedbookingDate.getDate() + 1);
+      console.log("Booking date adjusted to friday:", adjustedbookingDate);
     }
 
     // Validate required data
@@ -110,16 +110,16 @@ router.post("/", async (req, res) => {
     }
 
     // Parse bookingDate into a date object
-    const parsedBookingDate = new Date(adjustedBookingDate);
-    console.log("adjustedBookingDate is:", adjustedBookingDate);
+    const parsedbookingDate = new Date(adjustedbookingDate);
+    console.log("adjustedbookingDate is:", adjustedbookingDate);
 
     // Check if the parsed date is valid
-    if (isNaN(parsedBookingDate)) {
+    if (isNaN(parsedbookingDate)) {
       return res.status(400).json({ message: "Invalid booking date format." });
     }
 
-    const cetBookingDate = convertToCET(parsedBookingDate);
-    console.log("Booking date in CET:", cetBookingDate);
+    const cetbookingDate = convertToCET(parsedbookingDate);
+    console.log("Booking date in CET:", cetbookingDate);
 
     // Check if user exists
     const user = await User.findById(userId);
@@ -144,7 +144,7 @@ router.post("/", async (req, res) => {
         bookingId: await generateUniqueBookingId(),
         userId,
         seatId,
-        bookingDate: cetBookingDate,
+        bookingDate: cetbookingDate,
         dayIndex: adjustedDayIndex,
         slotIndex,
         userName,
@@ -165,7 +165,7 @@ router.post("/", async (req, res) => {
         bookingId: await generateUniqueBookingId(),
         userId,
         seatId,
-        bookingDate: cetBookingDate,
+        bookingDate: cetbookingDate,
         dayIndex: adjustedDayIndex,
         slotIndex,
         userName,
@@ -216,12 +216,12 @@ router.put("/:bookingId/cancel", async (req, res) => {
 });
 
 // Endpoint to update replaced booking
-router.put("/:bookingDate/replace", async (req, res) => {
+router.put("/:bookingId/replace", async (req, res) => {
   try {
-    const { bookingDate } = req.params;
+    const { bookingId } = req.params;
     const { userId, userName } = req.body;
 
-    console.log("Replacing booking for bookingId:", bookingDate);
+    console.log("Replacing booking for bookingId:", bookingId);
     console.log("Request body for replaced booking:", req.body);
 
     // Validate required fields
@@ -240,23 +240,10 @@ router.put("/:bookingDate/replace", async (req, res) => {
     };
     console.log("updated fields  for canceled booking are:", updatedFields);
     
-    // Ensure correct date format for the query
-    const formattedBookingDate = new Date(bookingDate);
-    if (isNaN(formattedBookingDate)) {
-      return res.status(400).json({ message: "Invalid bookingDate format." });
-    }
-
-    // Debugging log to verify database content
-    const existingBooking = await Booking.findOne({ formattedBookingDate });
-    if (!existingBooking) {
-      console.log('No booking found with bookingDate:', formattedBookingDate);
-    } else {
-      console.log('Existing booking found:', existingBooking);
-    }
 
     // Find and update the booking by bookingId (not _id)
     const booking = await Booking.findOneAndUpdate(
-      { bookingDate: formattedBookingDate }, // Query explicitly by booking date
+      { bookingId: bookingId }, // Query explicitly by booking date
       { $set: updatedFields }, // Replace with new data
       { new: true } // Return the updated document
     );

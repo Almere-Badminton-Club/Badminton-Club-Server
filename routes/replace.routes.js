@@ -4,20 +4,12 @@ const mongoose = require("mongoose");
 const Booking = require("../models/Booking.model");
 
 // Replace canceled booking (C1) with waiting booking (W1)
-router.put("/:bookingDate/replace", async (req, res) => {
-  const { bookingDate } = req.params;
+router.put("/:bookingId/replace", async (req, res) => {
+  const { bookingId } = req.params;
   const { userId, userName } = req.body; // Removed unused fields
 
   try {
-    // Validate bookingDate
-    const parsedDate = new Date(bookingDate);
-    if (isNaN(parsedDate)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid booking date format.",
-      });
-    }
-
+    
     // Validate input data
     if (!userId || !userName) {
       return res.status(400).json({
@@ -28,7 +20,7 @@ router.put("/:bookingDate/replace", async (req, res) => {
 
     // Find the canceled booking
     const canceledBooking = await Booking.findOne({
-      bookingDate: parsedDate,
+      bookingId: bookingId,
       isCanceled: true,
     });
 
@@ -49,7 +41,7 @@ router.put("/:bookingDate/replace", async (req, res) => {
 
     // Find the waiting user's booking
     const waitingUserBooking = await Booking.findOne({
-      userId,
+      bookingId: bookingId,
       isWaitingUser: true,
     });
 
