@@ -10,10 +10,11 @@ router.put("/:bookingDate/replace", async (req, res) => {
 
   try {
     // Validate bookingDate
-    if (!mongoose.Types.ObjectId.isValid(bookingDate)) {
+    const parsedDate = new Date(bookingDate);
+    if (isNaN(parsedDate)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid booking ID format",
+        message: "Invalid booking date format.",
       });
     }
 
@@ -26,7 +27,10 @@ router.put("/:bookingDate/replace", async (req, res) => {
     }
 
     // Find the canceled booking
-    const canceledBooking = await Booking.findOne(bookingDate);
+    const canceledBooking = await Booking.findOne({
+      bookingDate: parsedDate,
+      isCanceled: true,
+    });
 
     if (!canceledBooking) {
       return res.status(404).json({
@@ -61,7 +65,6 @@ router.put("/:bookingDate/replace", async (req, res) => {
     canceledBooking.userName = waitingUserBooking.userName;
     canceledBooking.isCanceled = false;
     canceledBooking.isWaitingUser = false;
-    canceledBooking.slotIndex = canceledBooking.slotIndex;
 
     // Save the updated canceled booking
     const updatedBooking = await canceledBooking.save();

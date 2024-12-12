@@ -239,18 +239,24 @@ router.put("/:bookingId/replace", async (req, res) => {
       isCanceled: false,
     };
     console.log("updated fields  for canceled booking are:", updatedFields);
+    
+    // Ensure correct date format for the query
+    const formattedBookingDate = new Date(bookingDate);
+    if (isNaN(formattedBookingDate)) {
+      return res.status(400).json({ message: "Invalid bookingDate format." });
+    }
 
     // Debugging log to verify database content
-    const existingBooking = await Booking.findOne({ bookingDate });
+    const existingBooking = await Booking.findOne({ formattedBookingDate });
     if (!existingBooking) {
-      console.log('No booking found with bookingDate:', bookingDate);
+      console.log('No booking found with bookingDate:', formattedBookingDate);
     } else {
       console.log('Existing booking found:', existingBooking);
     }
 
     // Find and update the booking by bookingId (not _id)
     const booking = await Booking.findOneAndUpdate(
-      { bookingDate }, // Query explicitly by booking date
+      { bookingDate: formattedBookingDate }, // Query explicitly by booking date
       { $set: updatedFields }, // Replace with new data
       { new: true } // Return the updated document
     );
