@@ -218,10 +218,10 @@ router.put("/:bookingId/cancel", async (req, res) => {
 // Endpoint to update replaced booking
 router.put("/:bookingId/replace", async (req, res) => {
   try {
-    const { bookingId } = req.params;
+    const { bookingDate } = req.params;
     const { userId, userName } = req.body;
 
-    console.log("Replacing booking for bookingId:", bookingId);
+    console.log("Replacing booking for bookingId:", bookingDate);
     console.log("Request body for replaced booking:", req.body);
 
     // Validate required fields
@@ -240,9 +240,17 @@ router.put("/:bookingId/replace", async (req, res) => {
     };
     console.log("updated fields  for canceled booking are:", updatedFields);
 
+    // Debugging log to verify database content
+    const existingBooking = await Booking.findOne({ bookingDate });
+    if (!existingBooking) {
+      console.log('No booking found with bookingDate:', bookingDate);
+    } else {
+      console.log('Existing booking found:', existingBooking);
+    }
+
     // Find and update the booking by bookingId (not _id)
     const booking = await Booking.findOneAndUpdate(
-      { bookingId }, // Query explicitly by bookingId
+      { bookingDate }, // Query explicitly by booking date
       { $set: updatedFields }, // Replace with new data
       { new: true } // Return the updated document
     );
