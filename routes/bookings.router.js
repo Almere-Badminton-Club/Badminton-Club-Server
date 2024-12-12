@@ -22,7 +22,6 @@ const generateUniqueBookingId = async () => {
   return bookingId;
 };
 
-
 // Endpoint to fetch bookings by date
 router.get("/", async (req, res) => {
   const date = req.query.date;
@@ -36,11 +35,9 @@ router.get("/", async (req, res) => {
     }
     console.log("Received date:", date);
 
-    
-
     // Convert the query date to CET
     const parsedDate = convertToCET(new Date(date));
-    console.log('Parsed date in CET:', parsedDate);
+    console.log("Parsed date in CET:", parsedDate);
 
     // Calculate the start and end of the day in CET
     const startOfDay = new Date(parsedDate);
@@ -58,11 +55,14 @@ router.get("/", async (req, res) => {
     });
 
     // Convert the UTC bookingDate to CET for each booking
-    const bookingsWithCETDate = bookings.map(booking => {
-      const cetBookingDate = utcToZonedTime(booking.bookingDate, 'Europe/Amsterdam');
+    const bookingsWithCETDate = bookings.map((booking) => {
+      const cetBookingDate = utcToZonedTime(
+        booking.bookingDate,
+        "Europe/Amsterdam"
+      );
       booking.bookingDate = cetBookingDate;
       return booking;
-    })
+    });
 
     console.log("Fetched bookings:", bookingsWithCETDate);
 
@@ -80,7 +80,8 @@ router.get("/", async (req, res) => {
 // Endpoint to create a new booking
 router.post("/", async (req, res) => {
   try {
-    const { userId, seatId, bookingDate, dayIndex, slotIndex, userName } = req.body;
+    const { userId, seatId, bookingDate, dayIndex, slotIndex, userName } =
+      req.body;
 
     console.log("Incoming Request:", req.body);
 
@@ -110,7 +111,7 @@ router.post("/", async (req, res) => {
 
     // Parse bookingDate into a date object
     const parsedBookingDate = new Date(adjustedBookingDate);
-    console.log('adjustedBookingDate is:', adjustedBookingDate );
+    console.log("adjustedBookingDate is:", adjustedBookingDate);
 
     // Check if the parsed date is valid
     if (isNaN(parsedBookingDate)) {
@@ -134,11 +135,10 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ message: "Seat not found." });
     }
 
-    
     let booking;
-    
-    if ( slotIndex >= 20) {
-      console.log('proceeding with waiting booking.');
+
+    if (slotIndex >= 20) {
+      console.log("proceeding with waiting booking.");
       // All regular slots are taken, so treat this as a waiting list booking
       booking = new Booking({
         bookingId: await generateUniqueBookingId(),
@@ -151,14 +151,15 @@ router.post("/", async (req, res) => {
         isWaitingUser: true, // Mark as waiting list
         cancelRequests: [],
       });
-      console.log('Data passed to mongodb:', booking)
+      console.log("Data passed to mongodb:", booking);
       await booking.save();
       const savedBooking = await Booking.findById(booking._id);
-      console.log('Saved booking waiting list:', savedBooking);
-      return res.status(201).json({ message: "Added to waiting list", booking });
-
+      console.log("Saved booking waiting list:", savedBooking);
+      return res
+        .status(201)
+        .json({ message: "Added to waiting list", booking });
     } else {
-      console.log('proceeding with regular booking.');
+      console.log("proceeding with regular booking.");
       // Create regular booking if there are available slots
       booking = new Booking({
         bookingId: await generateUniqueBookingId(),
@@ -171,19 +172,19 @@ router.post("/", async (req, res) => {
         isWaitingUser: false, // Mark as regular booking
         cancelRequests: [],
       });
-      console.log('Booking object before saving regular booking:', booking);
+      console.log("Booking object before saving regular booking:", booking);
       await booking.save();
       const savedBooking = await Booking.findById(booking._id);
-      console.log('Saved regular booking:', savedBooking);
-      return res.status(201).json({ message: "Booking created successfully.", booking });
+      console.log("Saved regular booking:", savedBooking);
+      return res
+        .status(201)
+        .json({ message: "Booking created successfully.", booking });
     }
-    
   } catch (error) {
     console.error("Error creating booking:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // Endpoint to update a booking by ID for cancellation
 router.put("/:bookingId/cancel", async (req, res) => {
@@ -214,19 +215,19 @@ router.put("/:bookingId/cancel", async (req, res) => {
   }
 });
 
-// Endpoint to update replaced booking 
+// Endpoint to update replaced booking
 router.put("/:bookingId/replace", async (req, res) => {
   try {
     const { bookingId } = req.params;
-    const { userId, userName, slotIndex, bookingDate } = req.body;
+    const { userId, userName } = req.body;
 
     console.log("Replacing booking for bookingId:", bookingId);
-    console.log('Request body for replaced booking:', req.body);
+    console.log("Request body for replaced booking:", req.body);
 
     // Validate required fields
-    if (!userId, !userName, !slotIndex, !bookingDate ) {
+    if ((!userId, !userName)) {
       return res.status(400).json({
-        message: 'MissingRequired fields.'
+        message: "MissingRequired fields.",
       });
     }
 
@@ -234,12 +235,10 @@ router.put("/:bookingId/replace", async (req, res) => {
     const updatedFields = {
       userId,
       userName,
-      slotIndex,
-      bookingDate,
       isWaitingUser: false,
       isCanceled: false,
     };
-    console.log('updated fields  for canceled booking are:', updatedFields);
+    console.log("updated fields  for canceled booking are:", updatedFields);
 
     // Find and update the booking by bookingId (not _id)
     const booking = await Booking.findOneAndUpdate(
@@ -258,7 +257,6 @@ router.put("/:bookingId/replace", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // Endpoint to delete a booking by ID
 router.delete("/:bookingId", async (req, res) => {
