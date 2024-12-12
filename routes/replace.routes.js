@@ -6,7 +6,7 @@ const Booking = require("../models/Booking.model");
 // Replace canceled booking (C1) with waiting booking (W1)
 router.put("/:bookingId/replace", async (req, res) => {
   const { bookingId } = req.params;
-  const { userId, userName } = req.body; // Removed unused fields
+  const { userId, userName, isCanceled, isWaitingUser } = req.body; // Removed unused fields
 
   try {
     
@@ -55,8 +55,8 @@ router.put("/:bookingId/replace", async (req, res) => {
     // Update the canceled booking with waiting user's details
     canceledBooking.userId = waitingUserBooking.userId;
     canceledBooking.userName = waitingUserBooking.userName;
-    canceledBooking.isCanceled = false;
-    canceledBooking.isWaitingUser = false;
+    canceledBooking.isCanceled = isCanceled || false;
+    canceledBooking.isWaitingUser = isWaitingUser || false;
 
     // Save the updated canceled booking
     const updatedBooking = await canceledBooking.save();

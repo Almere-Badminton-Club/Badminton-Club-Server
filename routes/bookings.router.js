@@ -219,13 +219,13 @@ router.put("/:bookingId/cancel", async (req, res) => {
 router.put("/:bookingId/replace", async (req, res) => {
   try {
     const { bookingId } = req.params;
-    const { userId, userName } = req.body;
+    const { userId, userName, isCanceled, isWaitingUser } = req.body;
 
     console.log("Replacing booking for bookingId:", bookingId);
     console.log("Request body for replaced booking:", req.body);
 
     // Validate required fields
-    if ((!userId, !userName)) {
+    if ((!userId, !userName, !isCanceled, !isWaitingUser)) {
       return res.status(400).json({
         message: "MissingRequired fields.",
       });
