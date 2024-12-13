@@ -238,6 +238,7 @@ router.put("/:bookingId/replace", async (req, res) => {
       userId,
       userName,
       isWaitingUser: false,
+      cancelId: '',
     };
     console.log("updated fields  for canceled booking are:", updatedFields);
 
