@@ -192,7 +192,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
     const { bookingId } = req.params;
     const { cancelRequest } = req.body;
 
-    console.log('req.body for cancel request', req.body);
+    console.log("req.body for cancel request", req.body);
 
     const booking = await Booking.findOneAndUpdate(
       { bookingId },
@@ -221,7 +221,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
 router.put("/:bookingId/replace", async (req, res) => {
   try {
     const { bookingId } = req.params;
-    const { userId, userName } = req.body;
+    const { userId, userName, isCanceled } = req.body;
 
     console.log("Replacing booking for bookingId:", bookingId);
     console.log("Request body for replaced booking:", req.body);
@@ -233,23 +233,27 @@ router.put("/:bookingId/replace", async (req, res) => {
       });
     }
 
-
-
     // update the specified fields
     const updatedFields = {
       userId,
       userName,
       isWaitingUser: false,
-      isCanceled: false,
     };
     console.log("updated fields  for canceled booking are:", updatedFields);
-    
 
     // Find and update the booking by bookingId (not _id)
     const booking = await Booking.findOneAndUpdate(
       { bookingId: bookingId }, // Query explicitly by booking id
-      { $set: updatedFields }, // Replace with new data
-      { new: true } // Return the updated document
+      {
+        $set: updatedFields,
+        $set: {
+          "cancelRequests.$[elem].isCanceled": isCanceled,
+        },
+      }, // Replace with new data
+      {
+        new: true, // return the updated document
+        arrayFilters: [{ "elem.cancelId": "C1" }], // Match the specific cancelId
+      }
     );
 
     if (!booking) {

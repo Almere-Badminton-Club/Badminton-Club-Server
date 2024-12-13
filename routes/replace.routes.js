@@ -9,9 +9,8 @@ router.put("/:bookingId/replace", async (req, res) => {
   const { userId, userName } = req.body; // Removed unused fields
 
   try {
-    
     // Validate input data
-    if ( !userId || !userName ) {
+    if (!userId || !userName) {
       return res.status(400).json({
         success: false,
         message: "userId and userName are required.",
@@ -23,8 +22,8 @@ router.put("/:bookingId/replace", async (req, res) => {
       bookingId: bookingId,
       isCanceled: true,
     });
+    console.log("Canceled user booking found:", canceledBooking);
 
-    console.log('Canceled user booking found:', canceledBooking);
     if (!canceledBooking) {
       return res.status(404).json({
         success: false,
@@ -45,7 +44,7 @@ router.put("/:bookingId/replace", async (req, res) => {
       bookingId: bookingId,
       isWaitingUser: true,
     });
-    console.log('Waiting user Booking found:', waitingUserBooking);
+    console.log("Waiting user Booking found:", waitingUserBooking);
 
     if (!waitingUserBooking) {
       return res.status(404).json({
@@ -53,16 +52,20 @@ router.put("/:bookingId/replace", async (req, res) => {
         message: "Waiting user booking not found.",
       });
     }
-
-    // Save the updated canceled booking
-    const updatedBooking = await canceledBooking.save(
-      // Update the canceled booking with waiting user's details
-    canceledBooking.userId = waitingUserBooking.userId,
-    canceledBooking.userName = waitingUserBooking.userName,
-    canceledBooking.isCanceled = isCanceled || false,
-    canceledBooking.isWaitingUser = isWaitingUser || false,
+    // Update the canceled booking with waiting user's details
+    const cancelRequestIndex = canceledBooking.cancelRequests.findIndex(
+      (req) => req.cancelId === "C1"
     );
-    console.log("Updated canceled booking:", updatedBooking);
+
+    if (cancelRequestIndex !== -1) {
+      canceledBooking.cancelRequests[cancelRequestIndex].isCanceled = false;
+    }
+
+    canceledBooking.userId = waitingUserBooking.userId;
+    canceledBooking.userName = waitingUserBooking.userName;
+    canceledBooking.isCanceled = false; // Update the main field as well
+    canceledBooking.isWaitingUser = false;
+    const updatedBooking = await canceledBooking.save();
 
     // Remove the waiting user's booking
     await Booking.deleteOne({ _id: waitingUserBooking._id });
