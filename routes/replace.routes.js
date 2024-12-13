@@ -6,12 +6,12 @@ const Booking = require("../models/Booking.model");
 // Replace canceled booking (C1) with waiting booking (W1)
 router.put("/:bookingId/replace", async (req, res) => {
   const { bookingId } = req.params;
-  const { userId, userName, isCanceled, isWaitingUser } = req.body; // Removed unused fields
+  const { userId, userName } = req.body; // Removed unused fields
 
   try {
     
     // Validate input data
-    if ( !userId || !userName || !isCanceled || !isWaitingUser ) {
+    if ( !userId || !userName ) {
       return res.status(400).json({
         success: false,
         message: "userId and userName are required.",
@@ -24,6 +24,7 @@ router.put("/:bookingId/replace", async (req, res) => {
       isCanceled: true,
     });
 
+    console.log('Canceled user booking found:', canceledBooking);
     if (!canceledBooking) {
       return res.status(404).json({
         success: false,
@@ -44,6 +45,7 @@ router.put("/:bookingId/replace", async (req, res) => {
       bookingId: bookingId,
       isWaitingUser: true,
     });
+    console.log('Waiting user Booking found:', waitingUserBooking);
 
     if (!waitingUserBooking) {
       return res.status(404).json({
@@ -52,14 +54,14 @@ router.put("/:bookingId/replace", async (req, res) => {
       });
     }
 
-    // Update the canceled booking with waiting user's details
-    canceledBooking.userId = waitingUserBooking.userId;
-    canceledBooking.userName = waitingUserBooking.userName;
-    canceledBooking.isCanceled = isCanceled || false;
-    canceledBooking.isWaitingUser = isWaitingUser || false;
-
     // Save the updated canceled booking
-    const updatedBooking = await canceledBooking.save();
+    const updatedBooking = await canceledBooking.save(
+      // Update the canceled booking with waiting user's details
+    canceledBooking.userId = waitingUserBooking.userId,
+    canceledBooking.userName = waitingUserBooking.userName,
+    canceledBooking.isCanceled = isCanceled || false,
+    canceledBooking.isWaitingUser = isWaitingUser || false,
+    );
     console.log("Updated canceled booking:", updatedBooking);
 
     // Remove the waiting user's booking
