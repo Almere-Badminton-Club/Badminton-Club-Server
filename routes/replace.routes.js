@@ -69,6 +69,7 @@ router.put("/:bookingId/replace", async (req, res) => {
 
     // Remove the waiting user's booking
     await Booking.deleteOne({ _id: waitingUserBooking._id });
+    console.log( 'deleted booking after replacement:',waitingUserBooking._id);
 
     return res.status(200).json({
       success: true,

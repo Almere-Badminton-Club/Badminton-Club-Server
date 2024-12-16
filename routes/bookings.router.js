@@ -238,7 +238,8 @@ router.put("/:bookingId/replace", async (req, res) => {
       userId,
       userName,
       isWaitingUser: false,
-      cancelId: '',
+      cancelId: "",
+      "cancelRequests.$[elem].isCanceled": isCanceled,
     };
     console.log("updated fields  for canceled booking are:", updatedFields);
 
@@ -246,11 +247,8 @@ router.put("/:bookingId/replace", async (req, res) => {
     const booking = await Booking.findOneAndUpdate(
       { bookingId: bookingId }, // Query explicitly by booking id
       {
-        $set: updatedFields,
-        $set: {
-          "cancelRequests.$[elem].isCanceled": isCanceled,
-        },
-      }, // Replace with new data
+        $set: updatedFields, // Replace with new data
+      },
       {
         new: true, // return the updated document
         arrayFilters: [{ "elem.cancelId": "C1" }], // Match the specific cancelId
