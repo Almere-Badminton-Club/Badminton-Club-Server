@@ -258,6 +258,16 @@ router.put("/:bookingId/replace", async (req, res) => {
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
+    // Deleting the replaced waiting list booking
+    const waitingBooking = await Booking.findByIdAndDelete({
+      bookingId: bookingId,
+      isWaitingUser: true,
+    })
+    if (waitingBooking) {
+      console.log('Waiting list booking deleted:', waitingBooking);
+    } else {
+      console.log('No waiting booking found to delete.')
+    }
 
     res.status(200).json({ message: "Booking replaced successfully", booking });
   } catch (error) {
