@@ -47,7 +47,7 @@ app.use('/replace', replaceRouter);
 
 // Mount balance routes
 const balanceRouter = require('./routes/balance.routes');
-app.use('/balance', balanceRouter);
+app.use('/users', balanceRouter);
 
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes

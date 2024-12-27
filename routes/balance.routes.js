@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/User.model");
 
 // Route to update the balance
-router.put("/users/update-balance/:userId", async (req, res) => {
+router.put("/update-balance/:userId", async (req, res) => {
   const { userId } = req.params;
   const { amount } = req.body; // amount to add
 
