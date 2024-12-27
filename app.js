@@ -45,6 +45,10 @@ app.use('/waiting', waitingRouter);
 const replaceRouter = require('./routes/replace.routes');
 app.use('/replace', replaceRouter);
 
+// Mount balance routes
+const balanceRouter = require('./routes/balance.routes');
+app.use('/balance', balanceRouter);
+
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
