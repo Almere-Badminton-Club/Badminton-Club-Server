@@ -77,6 +77,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Endpoint to fetch bookings for a specific user
+router.get("/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const bookings = await Booking.find({ userId });
+    if (!bookings || bookings.length === 0) {
+      return res.status(404).json({ message: 'No bookings found for this user'});
+    }
+    res.status(200).json(bookings);
+  } catch(error){
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Internal server error'});
+  }
+})
+
 // Endpoint to create a new booking
 router.post("/", async (req, res) => {
   try {
