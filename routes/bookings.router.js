@@ -78,7 +78,7 @@ router.get("/", async (req, res) => {
 });
 
 // Endpoint to fetch bookings for a specific user
-router.get("/:userId", async (req, res) => {
+router.get("/user/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
