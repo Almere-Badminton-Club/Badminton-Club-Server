@@ -21,6 +21,12 @@ const userSchema = new Schema(
     userType: {
       type: String,
       required: true,
+    },
+    balance: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: [0]
     }
     
   },

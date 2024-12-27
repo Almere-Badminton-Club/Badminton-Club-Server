@@ -11,10 +11,10 @@ const saltRounds = 10;
 
 // User registration endpoint
 router.post("/signup", (req, res, next) => {
-  const { name, email, password, userType} = req.body;
+  const { name, email, password, userType, balance} = req.body;
 
   // Check if email, password, and name are provided
-  if (email === '' || password === '' || name === '' || userType === '') {
+  if (email === '' || password === '' || name === '' || userType === '' || balance === 0) {
     res.status(400).json({ message: "Provide email, password, name and userType" });
     return;
   }
@@ -47,7 +47,7 @@ router.post("/signup", (req, res, next) => {
 
       
       // Create a new user
-      return User.create({ email, password: hashedPassword, name, userType });
+      return User.create({ email, password: hashedPassword, name, userType, balance });
     })
     .then(newUser => {
       if (!newUser){
@@ -57,10 +57,10 @@ router.post("/signup", (req, res, next) => {
       }
       // Deconstruct the newly created user object to omit the password
       // We should never expose passwords publicly
-      const { email, name, _id, userType} = newUser;
+      const { email, name, _id, userType, balance} = newUser;
 
       // Create a new object that doesn't expose the password
-      const user = { email, name, _id, userType};
+      const user = { email, name, _id, userType, balance};
 
       // Return success response
       res.status(201).json({ message: "User registered successfully.", user: user });
@@ -94,10 +94,10 @@ router.post("/login", (req, res, next) => {
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
-        const { _id, email, name, userType } = foundUser;
+        const { _id, email, name, userType, balance } = foundUser;
 
         // Create an object that will be set as the token payload
-        const payload = { _id, email, name, userType };
+        const payload = { _id, email, name, userType, balance };
 
         // Create a JSON Web Token and sign it
         const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
