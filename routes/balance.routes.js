@@ -37,13 +37,14 @@ router.put("/update-balance/:id", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log("User :", user);
 
     // Update the user's balance
     user.balance += amount;
     await user.save();
 
     res.status(200).json({ updatedBalance: user.balance });
+    console.log("User :", user);
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error. Try again later." });
