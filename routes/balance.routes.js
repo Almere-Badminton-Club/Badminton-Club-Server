@@ -23,12 +23,16 @@ router.get("/:id", async (req, res) => {
 
 // Route to update the balance
 
-router.put("/update-balance/:userId", async (req, res) => {
+router.put("/update-balance/:id", async (req, res) => {
   const userId = req.params.id;
+  console.log(' User id found: ', userId);
+
   const { amount } = req.body; // amount to add
+  console.log('Amount to be added is :', amount);
 
   try {
     const user = await User.findById(userId);
+    console.log('User:', user);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
