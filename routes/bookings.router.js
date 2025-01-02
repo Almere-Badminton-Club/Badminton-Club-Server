@@ -111,7 +111,7 @@ router.post("/", async (req, res) => {
 
     // Parse bookingDate into a date object
     const parsedbookingDate = new Date(adjustedbookingDate);
-    console.log("adjustedbookingDate is:", adjustedbookingDate);
+    console.log("adjusted booking Date is:", adjustedbookingDate);
 
     // Check if the parsed date is valid
     if (isNaN(parsedbookingDate)) {
@@ -123,6 +123,9 @@ router.post("/", async (req, res) => {
 
     // Check if user exists
     const user = await User.findById(userId);
+    console.log('User for balance:', user);
+    console.log('User balance is :', user.user.balance);
+    
     if (!user) {
       console.log("Validation Failed: User not found");
       return res.status(404).json({ message: "User not found." });
@@ -138,13 +141,13 @@ router.post("/", async (req, res) => {
 
     let booking;
 
-    if (user.balance < 4) {
+    if (user.user.balance < 4) {
       return res
         .status(400)
         .json({ message: "Insufficient balance to make a booking." });
     }
     // Deduct 4 euros from wallet
-    user.balance -= 4;
+    user.user.balance -= 4;
     await user.save();
     console.log('user balance:', user.balance);
 
