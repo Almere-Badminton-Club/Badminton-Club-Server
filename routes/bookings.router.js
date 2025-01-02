@@ -124,8 +124,8 @@ router.post("/", async (req, res) => {
     // Check if user exists
     const user = await User.findById(userId);
     console.log('User for balance:', user);
-    console.log('User balance is :', user.user.balance);
-    
+    console.log('User balance is :', user.balance);
+
     if (!user) {
       console.log("Validation Failed: User not found");
       return res.status(404).json({ message: "User not found." });
