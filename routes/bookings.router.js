@@ -141,13 +141,13 @@ router.post("/", async (req, res) => {
 
     let booking;
 
-    if (user.user.balance < 4) {
+    if (user.balance < 4) {
       return res
         .status(400)
         .json({ message: "Insufficient balance to make a booking." });
     }
     // Deduct 4 euros from wallet
-    user.user.balance -= 4;
+    user.balance -= 4;
     await user.save();
     console.log('user balance:', user.balance);
 
