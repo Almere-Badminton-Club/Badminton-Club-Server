@@ -56,4 +56,39 @@ router.put("/update-balance/:id", async (req, res) => {
   }
 });
 
+router.put("/:id/update-balance", async (req, res) => {
+  const { userId } = req.params;
+  const { amount } = req.body;
+
+  if (typeof amount !== 'number') {
+    return res.status(400).json({ message: 'Invalid amount, Must be a number.'});
+  }
+
+  try {
+    // Find the user by id
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Update e wallet balance
+    user.balance += amount;
+
+    if (user.balance < 0) {
+      return res.status(400).json({ message: 'Insufficient balnace.' });
+    }
+
+    await user.save();
+
+    // return updated balance
+
+    res.status(200).json({ message: 'Balance updated successfully.',
+  balance: user.balance,
+})
+  } catch(error) {
+    console.error('Error updating wallet:', error);
+    res.status(500).json({ message: 'internal server error.', error});
+  }
+})
+
 module.exports = router;
