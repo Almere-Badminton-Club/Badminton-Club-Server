@@ -143,10 +143,6 @@ router.post("/", async (req, res) => {
         .status(400)
         .json({ message: "Insufficient balance to make a booking." });
     }
-    // Deduct 4 euros from wallet
-    user.balance -= 4;
-    await user.save();
-    console.log("user balance:", user.balance);
 
     if (slotIndex >= 20) {
       console.log("proceeding with waiting booking.");
@@ -171,6 +167,12 @@ router.post("/", async (req, res) => {
         .json({ message: "Added to waiting list", booking });
     } else {
       console.log("proceeding with regular booking.");
+
+      // Deduct 4 euros from wallet
+      user.balance -= 4;
+      await user.save();
+      console.log("user balance:", user.balance);
+
       // Create regular booking if there are available slots
       booking = new Booking({
         bookingId: await generateUniqueBookingId(),
