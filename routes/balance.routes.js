@@ -24,13 +24,18 @@ router.get("/:id", async (req, res) => {
 // Route to update the balance
 
 router.put("/update-balance/:id", async (req, res) => {
+  try {
+
   const userId = req.params.id;
   console.log(' User id found: ', userId);
 
   const { amount } = req.body; // amount to add
   console.log('Amount to be added is :', amount);
 
-  try {
+  if (!amount || isNaN(amount)) {
+    return res.status(400).json({ message: 'Invalid amount.'})
+  }
+
     const user = await User.findById(userId);
     console.log('User:', user);
 

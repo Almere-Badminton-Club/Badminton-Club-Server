@@ -123,14 +123,11 @@ router.post("/", async (req, res) => {
 
     // Check if user exists
     const user = await User.findById(userId);
-    console.log('User for balance:', user);
-    console.log('User balance is :', user.balance);
 
     if (!user) {
       console.log("Validation Failed: User not found");
       return res.status(404).json({ message: "User not found." });
     }
-    
 
     // Check if seat exists
     const seat = await Seat.findById(seatId);
@@ -149,7 +146,7 @@ router.post("/", async (req, res) => {
     // Deduct 4 euros from wallet
     user.balance -= 4;
     await user.save();
-    console.log('user balance:', user.balance);
+    console.log("user balance:", user.balance);
 
     if (slotIndex >= 20) {
       console.log("proceeding with waiting booking.");
@@ -241,7 +238,7 @@ router.put("/:bookingId/replace", async (req, res) => {
     console.log("Request body for replaced booking:", req.body);
 
     // Validate required fields
-    if ((!userId || !userName)) {
+    if (!userId || !userName) {
       return res.status(400).json({
         message: " Missing Required fields.",
       });

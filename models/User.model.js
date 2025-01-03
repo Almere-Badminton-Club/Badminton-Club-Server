@@ -20,7 +20,7 @@ const userSchema = new Schema(
     },
     userType: {
       type: String,
-      required: true,
+      required: false,
     },
     balance: {
       type: Number,
