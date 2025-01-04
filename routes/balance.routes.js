@@ -12,32 +12,22 @@ router.get("/:id", async (req, res) => {
     const user = await User.findById(userId);
     console.log("User found:", user);
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Fetch the bookings for the user
     const bookings = await Booking.find({
       userId: new mongoose.Types.ObjectId(userId),
     });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.status(200).json({ balance: user.balance });
+    res.status(200).json({ balance: user.balance, bookings: bookings });
+    console.log('bookings fetched:', bookings);
   } catch (error) {
     console.error("Error fetching User:", error);
     res.status(500).json({ message: "Failed to fetch user" });
   }
 });
-try {
-  // Fetch bookings for the user
-  const bookings = await Booking.find({
-    userId: new mongoose.Types.ObjectId(userId),
-  });
-
-  // Return the booking data
-  res.json(bookings);
-  console.log("bookings fetched:", bookings);
-} catch (error) {
-  console.error("Error fetching bookings:", error);
-  res.status(500).json({ message: "Server error" });
-}
 
 // Route to update the balance
 
@@ -71,7 +61,5 @@ router.put("/update-balance/:id", async (req, res) => {
     res.status(500).json({ message: "Server error. Try again later." });
   }
 });
-
-
 
 module.exports = router;
