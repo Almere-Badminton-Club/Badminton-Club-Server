@@ -2,26 +2,42 @@ const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking.model');
 
-// Endpoint to add a cancellation request
-router.put('/:bookingId/cancel', async (req, res) => {
-  const { userId, bookingId, cancelId } = req.body;
-
+// Endpoint to update a booking by ID for cancellation
+router.put("/:bookingId/cancel", async (req, res) => {
   try {
-    // Find the booking by bookingId
-    const booking = await Booking.findOne({ bookingId });
+    const { bookingId } = req.params;
+    const { cancelRequest } = req.body;
 
-    if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+    console.log("req.body for cancel request", req.body);
+
+    const booking = await Booking.findOne({ bookingId });
+      
+    if(booking.cancelRequests.some((cancel) => cancel.cancelId === cancelRequest.cancelId)) {
+      return res.status(400).json({ message: 'This cancel request already exist'});
     }
 
-    // Add the cancel request to the booking
-    booking.cancelRequests.push({ cancelId }); // Assuming cancelId is an ObjectId
-    await booking.save(); // Save the updated booking
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      { bookingId },
+      {
+        $push: { cancelRequests: cancelRequest },
+        $set: {
+          isCanceled: cancelRequest.isCanceled
+            ? `${req.body.userName}`
+            : req.body.userName,
+        },
+      },
+      { new: true }
+    );
+    
+    
 
-    res.status(200).json({ message: 'Cancellation request added successfully', booking });
+    if (!updatedBooking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    res.status(200).json({ message: "Booking canceled", booking: updatedBooking });
   } catch (error) {
-    console.error('Error adding cancellation request:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error", error });
   }
 });
 
