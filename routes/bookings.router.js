@@ -83,7 +83,7 @@ router.get("/:id", async (req, res) => {
 
   try {
 // Fetch bookings for the user
-const bookings = await Booking.find({ userId: mongoose.Types.ObjectId(userId) });
+const bookings = await Booking.find({ userId: new mongoose.Types.ObjectId(userId) });
 
 // Return the booking data
 res.json(bookings);
