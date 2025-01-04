@@ -11,12 +11,15 @@ router.put("/:bookingId/cancel", async (req, res) => {
     console.log("req.body for cancel request", req.body);
 
     const booking = await Booking.findOne({ bookingId });
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
       
     if(booking.cancelRequests.some((cancel) => cancel.cancelId === cancelRequest.cancelId)) {
       return res.status(400).json({ message: 'This cancel request already exist'});
     }
 
-    const updatedBooking = await Booking.findByIdAndUpdate(
+    const updatedBooking = await Booking.findOneAndUpdate(
       { bookingId },
       {
         $push: { cancelRequests: cancelRequest },
