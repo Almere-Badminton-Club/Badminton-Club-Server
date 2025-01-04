@@ -87,6 +87,8 @@ const bookings = await Booking.find({ userId: new mongoose.Types.ObjectId(userId
 
 // Return the booking data
 res.json(bookings);
+console.log('bookings fetched:', bookings);
+
   } catch (error) {
     console.error('Error fetching bookings:', error);
     res.status(500).json({ message: 'Server error'});
