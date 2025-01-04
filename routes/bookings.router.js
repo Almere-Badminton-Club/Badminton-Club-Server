@@ -77,6 +77,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Endpoint to fetch bookings by userId
+router.get("/:id", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+// Fetch bookings for the user
+const bookings = await Booking.find({ userId });
+
+// Return the booking data
+res.json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ message: 'Server error'});
+  };
+});
+
 // Endpoint to create a new booking
 router.post("/", async (req, res) => {
   try {
