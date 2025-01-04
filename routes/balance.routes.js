@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User.model");
 const Booking = require("../models/Booking.model");
+const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Types;
+
 
 // Route to fetch user details
 router.get("/:id", async (req, res) => {
