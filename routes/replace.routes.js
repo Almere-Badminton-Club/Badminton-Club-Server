@@ -5,84 +5,50 @@ const Booking = require("../models/Booking.model");
 
 // Replace canceled booking (C1) with waiting booking (W1)
 router.put("/:bookingId/replace", async (req, res) => {
-  const { bookingId } = req.params;
-  const { userId, userName } = req.body; // Removed unused fields
-
-  try {
-    // Validate input data
-    if (!userId || !userName) {
-      return res.status(400).json({
-        success: false,
-        message: "userId and userName are required.",
-      });
+    try {
+      const { bookingId } = req.params;
+      const { userId, userName, isCanceled } = req.body;
+  
+      console.log("Replacing booking for bookingId:", bookingId);
+      console.log("Request body for replaced booking:", req.body);
+  
+      // Validate required fields
+      if (!userId || !userName) {
+        return res.status(400).json({
+          message: " Missing Required fields.",
+        });
+      }
+  
+      // update the specified fields
+      const updatedFields = {
+        userId,
+        userName,
+        isWaitingUser: false,
+        cancelId: "",
+        "cancelRequests.$[elem].isCanceled": isCanceled,
+      };
+      console.log("updated fields  for canceled booking are:", updatedFields);
+  
+      // Find and update the booking by bookingId (not _id)
+      const booking = await Booking.findOneAndUpdate(
+        { bookingId: bookingId }, // Query explicitly by booking id
+        {
+          $set: updatedFields, // Replace with new data
+        },
+        {
+          new: true, // return the updated document
+          arrayFilters: [{ "elem.cancelId": "C1" }], // Match the specific cancelId
+        }
+      );
+  
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      res.status(200).json({ message: "Booking replaced successfully", booking });
+    } catch (error) {
+      console.error("Error replacing booking:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-
-    // Find the canceled booking
-    const canceledBooking = await Booking.findOne({
-      bookingId: bookingId,
-      isCanceled: true,
-    });
-    console.log("Canceled user booking found:", canceledBooking);
-
-    if (!canceledBooking) {
-      return res.status(404).json({
-        success: false,
-        message: "Canceled booking not found.",
-      });
-    }
-
-    // Validate if the booking is marked as canceled
-    if (!canceledBooking.isCanceled) {
-      return res.status(400).json({
-        success: false,
-        message: "This booking is not marked as canceled.",
-      });
-    }
-
-    // Find the waiting user's booking
-    const waitingUserBooking = await Booking.findOne({
-      bookingId: bookingId,
-      isWaitingUser: true,
-    });
-    console.log("Waiting user Booking found:", waitingUserBooking);
-
-    if (!waitingUserBooking) {
-      return res.status(404).json({
-        success: false,
-        message: "Waiting user booking not found.",
-      });
-    }
-    // Update the canceled booking with waiting user's details
-    const cancelRequestIndex = canceledBooking.cancelRequests.findIndex(
-      (req) => req.cancelId === "C1"
-    );
-
-    if (cancelRequestIndex !== -1) {
-      canceledBooking.cancelRequests[cancelRequestIndex].isCanceled = false;
-    }
-
-    canceledBooking.userId = waitingUserBooking.userId;
-    canceledBooking.userName = waitingUserBooking.userName;
-    canceledBooking.isCanceled = false; // Update the main field as well
-    canceledBooking.isWaitingUser = false;
-    const updatedBooking = await canceledBooking.save();
-
-    // Remove the waiting user's booking
-    await Booking.deleteOne({ _id: waitingUserBooking._id });
-    console.log( 'deleted booking after replacement:',waitingUserBooking._id);
-
-    return res.status(200).json({
-      success: true,
-      message: "Booking replaced successfully.",
-      updatedBooking,
-    });
-  } catch (error) {
-    console.error("Error replacing booking:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error.",
-    });
-  }
-});
+  });
 
 module.exports = router;
