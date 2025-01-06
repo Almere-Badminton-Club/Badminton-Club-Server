@@ -7,7 +7,7 @@ const Booking = require("../models/Booking.model");
 router.put("/:bookingId/replace", async (req, res) => {
     try {
       const { bookingId } = req.params;
-      const { userId, userName, isCanceled } = req.body;
+      const { userId, userName, isCanceled, replacedBookingDate } = req.body;
   
       console.log("Replacing booking for bookingId:", bookingId);
       console.log("Request body for replaced booking:", req.body);
@@ -25,6 +25,7 @@ router.put("/:bookingId/replace", async (req, res) => {
         userName,
         isWaitingUser: false,
         cancelId: "",
+        replacedBookingDate: replacedBookingDate || null,
         "cancelRequests.$[elem].isCanceled": isCanceled,
       };
       console.log("updated fields  for canceled booking are:", updatedFields);

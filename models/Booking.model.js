@@ -52,6 +52,10 @@ const bookingSchema = new Schema(
                 default: false,
             }
         }],
+        replacedBookingDate: {
+            type: Date,
+            default: null,
+        }
     }, { timestamps: true});
 
 const Booking = model("Booking", bookingSchema);
