@@ -32,7 +32,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Route to update the balance
+// Route to add the balance
 
 router.put("/update-balance/:id", async (req, res) => {
   try {
@@ -62,6 +62,60 @@ router.put("/update-balance/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error. Try again later." });
+  }
+});
+
+// Route to credit the balance
+router.put("/credit-balance/:id",async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { amount } = req.body;
+
+    if ( amount === undefined || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: 'Invalid credit amount.' });
+    }
+    const user = await User.findById(userId);
+    if(!user) {
+      return res.status(404).json({ message: 'User not found'});
+    }
+
+    user.balance += Number(amount);
+    await user.save();
+
+    res.status(200).json({ updatedBalance: user.balance });
+  } catch(error) {
+    console.error('Error crediting balance.', error);
+    res.status(500).json({ message: 'Server error. Please try again.'});
+
+  }
+});
+
+// Route to debit the balance
+router.put("/debit-balance/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { amount } = req.body;
+
+    if (amount === undefined || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid debit amount." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.balance < amount) {
+      return res.status(400).json({ message: "Insufficient balance." });
+    }
+
+    user.balance -= Number(amount);
+    await user.save();
+
+    res.status(200).json({ updatedBalance: user.balance });
+  } catch (error) {
+    console.error("Error debiting balance:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
 });
 
