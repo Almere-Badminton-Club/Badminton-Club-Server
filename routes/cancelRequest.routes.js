@@ -30,7 +30,7 @@ router.put("/:bookingId/cancel", async (req, res) => {
     const updatedBooking = await Booking.findOneAndUpdate(
       { bookingId },
       {
-        $push: { cancelRequests: cancelRequest },
+        $addToSet: { cancelRequests: cancelRequest },
         $set: {
           isCanceled: true,
         },
