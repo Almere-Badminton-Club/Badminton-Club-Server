@@ -42,4 +42,33 @@ res.status(500).json({ error: "An error occured while processing the cancellatio
   }
 });
 
+// to fetch all canceled: true bookings
+router.get("/cancel-queue", async (req, res) => {
+  try { 
+const cancelQueue = await Booking.find({
+  "cancelRequests.isCanceled": true,
+});
+
+// format the response if necessary
+const formattedQueue = cancelQueue.map((booking) => {
+  const canceledRequest = booking.cancelRequests.find(
+    (request) => request.isCanceled === true
+  );
+  return {
+    bookingId: booking.bookingId,
+    userName: booking.userName,
+    dayIndex: booking.dayIndex,
+    slotIndex: booking.slotIndex,
+    bookingDate: booking.bookingDate,
+    cancelId: canceledRequest?.cancelId,
+  };
+});
+res.status(200).json({ cancelQueue: formattedQueue });
+  } catch(error) {
+    console.error("Error fetching cancel queue:", error);
+    res.status(500).json({ error: "Failed to fetch cancel queue." });
+  }
+})
+
+
 module.exports = router;
