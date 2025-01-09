@@ -4,52 +4,41 @@ const Booking = require("../models/Booking.model");
 
 // Endpoint to update a booking by ID for cancellation
 router.put("/:bookingId/cancel", async (req, res) => {
+  const { bookingId } = req.params;
+  const { cancelRequest } = req.body;
+
   try {
-    const { bookingId } = req.params;
-    const { cancelRequest } = req.body;
+    // validate request
+    if(!cancelRequest || !cancelRequest.cancelId || cancelRequest.isCanceled === undefined ) {
+      return res.status(400).json({ error: "Invalid cancel request data."});
+    }
 
-    console.log("req.body for cancel request", req.body);
-
+    // find the booking by bookingId
     const booking = await Booking.findOne({ bookingId });
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+      res.status(404).json({ error: "Booking not found."});
     }
 
-    // Check if the cancel request already exists
-    if (
-      booking.cancelRequests.some(
-        (cancel) => cancel.cancelId === cancelRequest.cancelId
-      )
-    ) {
-      return res
-        .status(400)
-        .json({ message: "This cancel request already exist" });
-    }
-
-    // Update the booking with the cancel request
-    const updatedBooking = await Booking.findOneAndUpdate(
-      { bookingId },
-      {
-        $addToSet: { cancelRequests: cancelRequest },
-        $set: {
-          isCanceled: true,
-        },
-      },
-      { new: true }
+    // check if the booking is already canceled
+    const alreadyCanceled = booking.cancelRequests?.some(
+      (request) => request.isCanceled === true
     );
-
-    if (!updatedBooking) {
-      return res.status(404).json({ message: "Booking not found" });
+    if (alreadyCanceled) {
+      return res.status(400).json({ error: "Booking has already been canceled." });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Booking canceled successfully.",
-        booking: updatedBooking,
-      });
-  } catch (error) {
-    res.status(500).json({ message: "Internal Server Error", error });
+    // Add the cancellation request to the cancel array
+    if(!booking.cancelRequests) {
+      booking.cancelRequests = [];
+    }
+    booking.cancelRequests.push(cancelRequest);
+
+    // save the updated booking document
+    await booking.save();
+    res.status(200).json({ message: "Cancel the booking request has been successfully submitted.", booking});
+  } catch(error) {
+console.error("Error updating cancellation request:", error);
+res.status(500).json({ error: "An error occured while processing the cancellation request."});
   }
 });
 
