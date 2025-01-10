@@ -61,6 +61,7 @@ const formattedQueue = cancelQueue.map((booking) => {
     slotIndex: booking.slotIndex,
     bookingDate: booking.bookingDate,
     cancelId: canceledRequest?.cancelId,
+    userId: booking.userId,
   };
 });
 res.status(200).json({ cancelQueue: formattedQueue });
