@@ -4,13 +4,13 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User.model'); // Your User model
 const Booking = require('../models/Booking.model'); // Your Booking model
-const { isAdmin } = require('../middleware/auth.middleware'); // Middleware to check if the user is admin
+const { isAdmin, authenticateUser } = require('../middleware/auth.middleware'); // Middleware to check if the user is admin
 
 
 
 
 // Admin endpoint to fetch all users and their bookings
-router.get('/users', isAdmin, async (req, res) => {
+router.get('/users',authenticateUser, isAdmin, async (req, res) => {
   try {
     // Fetch all users and their bookings
     const users = await User.find({}, 'name email userType'); // fetch only required fields
