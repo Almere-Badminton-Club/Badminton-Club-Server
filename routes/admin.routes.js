@@ -4,16 +4,9 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User.model'); // Your User model
 const Booking = require('../models/Booking.model'); // Your Booking model
-const { isAdmin } = require('../middleware/authMiddleware'); // Middleware to check if the user is admin
+const { isAdmin } = require('../middleware/auth.middleware'); // Middleware to check if the user is admin
 
-// Middleware to check if user is an admin
-const isAdmin = (req, res, next) => {
-  if (req.user && req.user.userType === 'admin') {
-    next();
-  } else {
-    res.status(403).json({ message: 'Access denied: Admins only.' });
-  }
-};
+
 
 
 // Admin endpoint to fetch all users and their bookings
