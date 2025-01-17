@@ -49,6 +49,10 @@ app.use('/replace', replaceRouter);
 const balanceRouter = require('./routes/balance.routes');
 app.use('/users', balanceRouter);
 
+// MOUNT admin routes
+const adminRouter = require('./routes/admin.routes');
+app.use('/admin', adminRouter);
+
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
