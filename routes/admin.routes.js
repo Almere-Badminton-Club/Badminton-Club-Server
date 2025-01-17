@@ -10,7 +10,7 @@ const { isAdmin } = require('../middleware/auth.middleware'); // Middleware to c
 
 
 // Admin endpoint to fetch all users and their bookings
-router.get('admin/users', isAdmin, async (req, res) => {
+router.get('/users', isAdmin, async (req, res) => {
   try {
     // Fetch all users and their bookings
     const users = await User.find({}, 'name email userType'); // fetch only required fields
