@@ -1,23 +1,24 @@
-const { expressjwt: jwt } = require("express-jwt");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User.model');
 
-
-const isAdmin = (req, res, next) => {
-  const token = req.header('Authorization').replace('Bearer ', '');
-  
+const authenticateUser = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Assuming "Bearer <token>"
   if (!token) {
-    return res.status(403).json({ message: 'No token, no access' });
+    return res.status(401).json({ message: 'Unauthorized: No token provided.' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.userType !== 'Admin') {
-      return res.status(403).json({ message: 'You are not authorized to access this page' });
+    const user = await User.findById(decoded.id); // Fetch user from DB
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
     }
-    req.user = decoded;
+    req.user = user; // Attach user to request
     next();
   } catch (error) {
-    return res.status(500).json({ message: 'Failed to authenticate token' });
+    console.error('Error verifying token:', error);
+    res.status(401).json({ message: 'Unauthorized: Invalid token.' });
   }
 };
 
-module.exports = { isAdmin };
+module.exports = { authenticateUser };
