@@ -1,23 +1,16 @@
-// Assuming you're using Express.js
-
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User.model'); // Your User model
-const Booking = require('../models/Booking.model'); // Your Booking model
-const { isAdmin, authenticateUser } = require('../middleware/auth.middleware'); // Middleware to check if the user is admin
+const User = require('../models/User.model');
+const { authenticateUser, isAdmin } = require('../middleware/authMiddleware');
 
-
-
-
-// Admin endpoint to fetch all users and their bookings
-router.get('/users',authenticateUser, isAdmin, async (req, res) => {
+console.log({ authenticateUser, isAdmin })
+router.get('/users', authenticateUser, isAdmin, async (req, res) => {
   try {
-    // Fetch all users and their bookings
-    const users = await User.find({}, 'name email userType'); // fetch only required fields
+    const users = await User.find({}, 'name email userType'); // Customize fields as needed
     res.status(200).json(users);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching users.', error });
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Error fetching users.' });
   }
 });
 
