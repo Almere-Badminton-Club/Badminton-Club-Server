@@ -6,7 +6,7 @@ const { authenticateUser, isAdmin } = require('../middleware/auth.middleware');
 console.log({ authenticateUser, isAdmin })
 router.get('/users', authenticateUser, isAdmin, async (req, res) => {
   try {
-    const users = await User.find({}, 'name email userType'); // Customize fields as needed
+    const users = await User.find({}, 'name email userType balance'); // Customize fields as needed
     res.status(200).json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
