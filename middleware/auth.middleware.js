@@ -21,7 +21,7 @@ const authenticateUser = async (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
-  if (req.user?.userType !== 'admin') {
+  if (req.user?.userType !== 'Admin') {
     return res.status(403).json({ message: 'Access denied: Admins only.' });
   }
   next();
