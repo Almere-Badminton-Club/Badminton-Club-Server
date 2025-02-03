@@ -8,8 +8,8 @@ const authenticateUser = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
     console.log('decoded token:', decoded);
-    
-    const user = await User.findById(decoded.id);
+
+    const user = await User.findById(decoded._id);
     if (!user) throw new Error('User not found.');
 
     req.user = user;
