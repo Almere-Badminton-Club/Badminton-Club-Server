@@ -14,4 +14,26 @@ router.get('/users', authenticateUser, isAdmin, async (req, res) => {
   }
 });
 
+// Update user balance (only accessible by admin)
+router.patch("/admin/users/:userId", authenticateUser, isAdmin, async (req, res) => {
+  try {
+    const { balance } = req.body;
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Update the user's balance
+    user.balance = balance;
+    await user.save();
+
+    res.status(200).json({ message: 'User balance updated successfully', balance: user.balance });
+  } catch (error) {
+    console.error('Error updating balance:', error);
+    res.status(500).json({ message: 'Error updating user balance.'});
+    }
+});
+
 module.exports = router;
