@@ -7,7 +7,8 @@ const authenticateUser = async (req, res, next) => {
     if (!token) throw new Error('No token provided.');
 
     const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-    console.log('Token secret:', process.env.TOKEN_SECRET);
+    console.log('decoded token:', decoded);
+    
     const user = await User.findById(decoded.id);
     if (!user) throw new Error('User not found.');
 
