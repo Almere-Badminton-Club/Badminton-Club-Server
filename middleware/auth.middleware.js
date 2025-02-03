@@ -13,6 +13,7 @@ const authenticateUser = async (req, res, next) => {
     if (!user) throw new Error('User not found.');
 
     req.user = user;
+    console.log('User is:', user);
     next();
   } catch (error) {
     res.status(401).json({ message: error.message });
