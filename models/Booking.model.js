@@ -63,7 +63,7 @@ const bookingSchema = new Schema(
     // field to automatically expire records
     expiresAt: {
       type: Date,
-      default: () => new Date(Date.now() + 60 * 24 * 60 * 1000),
+      default: () => new Date(Date.now() + 30 * 24 * 60 * 1000),
       index: { expires: 0 },
     },
   },
