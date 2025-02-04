@@ -15,7 +15,7 @@ router.get('/users', authenticateUser, isAdmin, async (req, res) => {
 });
 
 // Update user balance (only accessible by admin)
-router.patch("/admin/users/:userId", authenticateUser, isAdmin, async (req, res) => {
+router.patch("/users/:userId", authenticateUser, isAdmin, async (req, res) => {
   try {
     const { balance } = req.body;
     const userId = req.params.userId;
