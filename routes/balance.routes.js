@@ -4,6 +4,7 @@ const User = require("../models/User.model");
 const Booking = require("../models/Booking.model");
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
+const CreditAmount = require("../models/CreditAmount.model");
 
 
 // Route to fetch user details
@@ -82,10 +83,24 @@ router.put("/credit-balance/:id",async (req, res) => {
       return res.status(404).json({ message: 'User not found'});
     }
 
+    // Update user balance
     user.balance += Number(amount);
     await user.save();
 
-    res.status(200).json({ updatedBalance: user.balance });
+    // Create a new CreditAmount transaction for manual credit
+    const newTransaction = new CreditAmount({
+      userId: user._id,
+      amountCredited: amount,
+      transactionType: "credit",
+      isManualCredit: true,
+    });
+    await newTransaction.save();
+    console.log('New transaction:', newTransaction);
+
+    res.status(200).json({ 
+      updatedBalance: user.balance,
+    newTransaction: newTransaction,
+   });
   } catch(error) {
     console.error('Error crediting balance.', error);
     res.status(500).json({ message: 'Server error. Please try again.'});
