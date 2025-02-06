@@ -24,8 +24,15 @@ router.get("/:id", async (req, res) => {
       userId: new mongoose.Types.ObjectId(userId),
     });
 
-    res.status(200).json({ balance: user.balance, bookings: bookings });
+    // Fetch the transaction for the user
+    const transactions = await CreditAmount.find({
+      userId: new mongoose.Types.ObjectId(userId),
+    }).sort({ amountCreditDate: -1 }); // sort by date
+
+    res.status(200).json({ balance: user.balance, bookings: bookings, transactions: transactions });
     console.log("bookings fetched:", bookings);
+    console.log("transactions fetched:", transactions);
+    
   } catch (error) {
     console.error("Error fetching User:", error);
     res.status(500).json({ message: "Failed to fetch user" });
