@@ -56,10 +56,18 @@ router.put("/update-balance/:id", async (req, res) => {
 
     // Update the user's balance
     user.balance += amount;
+    await user.save();
 
     
-
-    await user.save();
+    // Create a new CreditAmount transaction for manual credit
+    const newTransaction = new CreditAmount({
+      userId: user._id,
+      amountCredited: amount,
+      transactionType: "credit",
+      isManualCredit: true,
+    });
+    await newTransaction.save();
+    console.log('New transaction:', newTransaction);
 
     res.status(200).json({ updatedBalance: user.balance });
     console.log("Balance updated successfully :", user.balance);
@@ -87,15 +95,7 @@ router.put("/credit-balance/:id",async (req, res) => {
     user.balance += Number(amount);
     await user.save();
 
-    // Create a new CreditAmount transaction for manual credit
-    const newTransaction = new CreditAmount({
-      userId: user._id,
-      amountCredited: amount,
-      transactionType: "credit",
-      isManualCredit: true,
-    });
-    await newTransaction.save();
-    console.log('New transaction:', newTransaction);
+    
 
     res.status(200).json({ 
       updatedBalance: user.balance,
