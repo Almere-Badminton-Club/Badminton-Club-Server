@@ -39,7 +39,7 @@ router.put("/update-balance/:id", async (req, res) => {
     const userId = req.params.id;
     console.log(" User id found: ", userId);
 
-    const { amount } = req.body; // amount to add
+    const { amount, transactionType } = req.body; // amount to add
     console.log("Amount to be added is :", amount);
 
     if (!amount || isNaN(amount)) {
@@ -55,6 +55,14 @@ router.put("/update-balance/:id", async (req, res) => {
 
     // Update the user's balance
     user.balance += amount;
+
+    // Store transaction history
+    user.bookings.push({
+      bookingDate: new Date(),
+      amountCredited: amount,
+      transactionType: transactionType || "credit",
+    });
+    
     await user.save();
 
     res.status(200).json({ updatedBalance: user.balance });
