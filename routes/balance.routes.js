@@ -56,6 +56,7 @@ router.put("/update-balance/:id", async (req, res) => {
     // Update the user's balance
     user.balance += amount;
     await user.save();
+    console.log('Amount has been added.');
 
     // Create a new CreditAmount transaction for manual credit
     const transaction = new CreditAmount({
