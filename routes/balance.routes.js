@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 const CreditAmount = require("../models/CreditAmount.model");
 
-
 // Route to fetch user details
 router.get("/:id", async (req, res) => {
   const userId = req.params.id;
@@ -26,7 +25,7 @@ router.get("/:id", async (req, res) => {
     });
 
     res.status(200).json({ balance: user.balance, bookings: bookings });
-    console.log('bookings fetched:', bookings);
+    console.log("bookings fetched:", bookings);
   } catch (error) {
     console.error("Error fetching User:", error);
     res.status(500).json({ message: "Failed to fetch user" });
@@ -58,18 +57,21 @@ router.put("/update-balance/:id", async (req, res) => {
     user.balance += amount;
     await user.save();
 
-    
     // Create a new CreditAmount transaction for manual credit
-    const newTransaction = new CreditAmount({
+    const transaction = new CreditAmount({
       userId: user._id,
       amountCredited: amount,
       transactionType: "credit",
       isManualCredit: true,
     });
-    await newTransaction.save();
-    console.log('New transaction:', newTransaction);
+    await transaction.save();
+    console.log("New transaction:", transaction);
 
-    res.status(200).json({ updatedBalance: user.balance });
+    // Return both updated balance and transaction
+    res.status(200).json({
+      updatedBalance: user.balance,
+      newTransaction: transaction,
+    });
     console.log("Balance updated successfully :", user.balance);
   } catch (error) {
     console.error(error);
@@ -78,33 +80,29 @@ router.put("/update-balance/:id", async (req, res) => {
 });
 
 // Route to credit the balance
-router.put("/credit-balance/:id",async (req, res) => {
+router.put("/credit-balance/:id", async (req, res) => {
   try {
     const userId = req.params.id;
     const { amount } = req.body;
 
-    if ( amount === undefined || isNaN(amount) || amount <= 0) {
-      return res.status(400).json({ message: 'Invalid credit amount.' });
+    if (amount === undefined || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid credit amount." });
     }
     const user = await User.findById(userId);
-    if(!user) {
-      return res.status(404).json({ message: 'User not found'});
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Update user balance
     user.balance += Number(amount);
     await user.save();
 
-    
-
-    res.status(200).json({ 
+    res.status(200).json({
       updatedBalance: user.balance,
-    newTransaction: newTransaction,
-   });
-  } catch(error) {
-    console.error('Error crediting balance.', error);
-    res.status(500).json({ message: 'Server error. Please try again.'});
-
+    });
+  } catch (error) {
+    console.error("Error crediting balance.", error);
+    res.status(500).json({ message: "Server error. Please try again." });
   }
 });
 
