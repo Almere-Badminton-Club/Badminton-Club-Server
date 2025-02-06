@@ -56,13 +56,8 @@ router.put("/update-balance/:id", async (req, res) => {
     // Update the user's balance
     user.balance += amount;
 
-    // Store transaction history
-    user.bookings.push({
-      bookingDate: new Date(),
-      amountCredited: amount,
-      transactionType: transactionType || "credit",
-    });
     
+
     await user.save();
 
     res.status(200).json({ updatedBalance: user.balance });
