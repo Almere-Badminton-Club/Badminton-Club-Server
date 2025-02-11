@@ -53,6 +53,11 @@ app.use('/users', balanceRouter);
 const adminRouter = require('./routes/admin.routes');
 app.use('/admin', adminRouter);
 
+// MOUNT transaction routes
+const transactionRouter = require('./routes/transaction.routes');
+app.use('/transactions', transactionRouter);
+
+
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
