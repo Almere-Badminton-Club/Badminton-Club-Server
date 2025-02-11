@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Transaction = require("../models/Transaction");
+const Transaction = require("../models/Transaction.model");
 
 // Get transactions for a specific user
 router.get("/:userId", async (req, res) => {
