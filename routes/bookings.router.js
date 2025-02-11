@@ -79,12 +79,13 @@ router.get("/", async (req, res) => {
 
 // Endpoint to fetch bookings by userId
 router.get("/:id", async (req, res) => {
-  const  userId  = req.params.userId;
-  console.log('userId:', req.params.userId);
+  const  userId  = req.params.id;
+  console.log('userId:', userId);
 
   try {
 // Fetch bookings for the user
 const bookings = await Booking.find({ userId: new mongoose.Types.ObjectId(userId) });
+console.log("Bookings fetched:", bookings);
 
 // Return the booking data
 res.json(bookings);
