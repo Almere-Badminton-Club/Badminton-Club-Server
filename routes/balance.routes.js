@@ -13,8 +13,7 @@ router.get("/:id", async (req, res) => {
 
   try {
     const user = await User.findById(userId)
-    .populate('transactions')
-    .exec();
+    
     console.log("User found:", user);
 
     if (!user) {
@@ -26,18 +25,13 @@ router.get("/:id", async (req, res) => {
       userId: new mongoose.Types.ObjectId(userId),
     });
 
-    // Fetch the transaction for the user
-    const transactions = await CreditAmount.find({
-      userId: new mongoose.Types.ObjectId(userId),
-    }).sort({ amountCreditDate: -1 }); // sort by date
+    
 
     res.status(200).json({ 
       balance: user.balance, 
       bookings: user.bookings, 
-      transactions: user.transactions 
     });
     console.log("bookings fetched:", bookings);
-    console.log("transactions fetched:", transactions);
     
   } catch (error) {
     console.error("Error fetching User:", error);
