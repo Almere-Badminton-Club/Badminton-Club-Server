@@ -4,7 +4,7 @@ const User = require("../models/User.model");
 const Booking = require("../models/Booking.model");
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
-const CreditAmount = require("../models/CreditAmount.model");
+const CreditAmount = require("../models/Transaction.model");
 
 // Route to fetch user details
 router.get("/:id", async (req, res) => {
@@ -12,7 +12,9 @@ router.get("/:id", async (req, res) => {
   console.log("userId found:", userId);
 
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId)
+    .populate('transactions')
+    .exec();
     console.log("User found:", user);
 
     if (!user) {
@@ -29,7 +31,11 @@ router.get("/:id", async (req, res) => {
       userId: new mongoose.Types.ObjectId(userId),
     }).sort({ amountCreditDate: -1 }); // sort by date
 
-    res.status(200).json({ balance: user.balance, bookings: bookings, transactions: transactions });
+    res.status(200).json({ 
+      balance: user.balance, 
+      bookings: user.bookings, 
+      transactions: user.transactions 
+    });
     console.log("bookings fetched:", bookings);
     console.log("transactions fetched:", transactions);
     
