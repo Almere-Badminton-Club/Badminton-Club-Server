@@ -43,45 +43,35 @@ res.status(500).json({ error: "An error occured while processing the cancellatio
 });
 
 // to fetch all canceled: true bookings
+
+// to fetch all canceled: true bookings
 router.get("/cancel-queue", async (req, res) => {
   try { 
-    const { date } = req.query; // Get the selected date from request
+const cancelQueue = await Booking.find({
+  "cancelRequests.isCanceled": true,
+});
 
-    if (!date) {
-      return res.status(400).json({ error: "Date is required." });
-    }
-
-    // Convert date string to a proper Date object
-    const selectedDate = new Date(date);
-    selectedDate.setHours(0, 0, 0, 0); // Normalize to start of day
-
-    const cancelQueue = await Booking.find({
-      "cancelRequests.isCanceled": true,
-      bookingDate: { $gte: selectedDate, $lt: new Date(selectedDate.getTime() + 86400000) } // Filter for the selected day
-    });
-
-    // Format the response if necessary
-    const formattedQueue = cancelQueue.map((booking) => {
-      const canceledRequest = booking.cancelRequests.find(
-        (request) => request.isCanceled === true
-      );
-      return {
-        bookingId: booking.bookingId,
-        userName: booking.userName,
-        dayIndex: booking.dayIndex,
-        slotIndex: booking.slotIndex,
-        bookingDate: booking.bookingDate,
-        cancelId: canceledRequest?.cancelId,
-        userId: booking.userId,
-      };
-    });
-
-    res.status(200).json({ cancelQueue: formattedQueue });
-  } catch (error) {
+// format the response if necessary
+const formattedQueue = cancelQueue.map((booking) => {
+  const canceledRequest = booking.cancelRequests.find(
+    (request) => request.isCanceled === true
+  );
+  return {
+    bookingId: booking.bookingId,
+    userName: booking.userName,
+    dayIndex: booking.dayIndex,
+    slotIndex: booking.slotIndex,
+    bookingDate: booking.bookingDate,
+    cancelId: canceledRequest?.cancelId,
+    userId: booking.userId,
+  };
+});
+res.status(200).json({ cancelQueue: formattedQueue });
+  } catch(error) {
     console.error("Error fetching cancel queue:", error);
     res.status(500).json({ error: "Failed to fetch cancel queue." });
   }
-});
+})
 
 
 
