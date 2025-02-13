@@ -32,7 +32,13 @@ const transactionSchema = new Schema({
     type: Date,
     default: null,
   },
+  createdAt: {
+    type: Date,
+    dafault: Date.now,
+  },
 });
+
+transactionSchema.index({ createdAt: 1}, { expireAfterSeconds: 30 * 24 * 60 * 60 });
 
 const Transaction = model("Transaction", transactionSchema);
 
